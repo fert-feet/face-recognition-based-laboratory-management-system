@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * </p>
  *
  * @author Ky2Fe
- * @since 2023-01-31
+ * @since 2023-02-01
  */
 public interface ILaboratoryService extends IService<Laboratory> {
 

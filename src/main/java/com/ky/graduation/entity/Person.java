@@ -12,7 +12,7 @@ import lombok.Setter;
  * </p>
  *
  * @author Ky2Fe
- * @since 2023-01-31
+ * @since 2023-02-01
  */
 @Getter
 @Setter
@@ -35,4 +35,9 @@ public class Person implements Serializable {
      * 人员密码，任何涉及个人密码的方面都可以使用
      */
     private String password;
+
+    /**
+     * 身份证号码，用于登录
+     */
+    private Integer idNumber;
 }

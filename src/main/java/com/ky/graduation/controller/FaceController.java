@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
  * </p>
  *
  * @author Ky2Fe
- * @since 2023-01-31
+ * @since 2023-02-01
  */
 @RestController
 @RequestMapping("/face")

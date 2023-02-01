@@ -1,4 +1,4 @@
-package com.ky.graduation.Generator;
+package com.ky.graduation.generator;
 
 import com.baomidou.mybatisplus.generator.FastAutoGenerator;
 import com.baomidou.mybatisplus.generator.config.OutputFile;
