@@ -1,6 +1,9 @@
 package com.ky.graduation.controller;
 
 import com.ky.graduation.result.ResultVo;
+import com.ky.graduation.service.IAdminService;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,14 +18,31 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2023-02-01
  */
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/user")
+@Slf4j
 public class AdminController {
-    @PostMapping("/test")
-    public ResultVo test(String url) {
-        if (url != null) {
-            return ResultVo.success().data("url",url);
-        }
-        return ResultVo.error();
+
+    @Resource
+    private IAdminService adminService;
+
+    /**
+     * 系统登录
+     *
+     * @param username
+     * @param password
+     * @return
+     */
+    @PostMapping("/login")
+    public ResultVo login(String username,String password) {
+        return adminService.login(username,password);
     }
 
+    /**
+     * 登出
+     * @return
+     */
+    @PostMapping("/logout")
+    public ResultVo logout() {
+        return ResultVo.success();
+    }
 }

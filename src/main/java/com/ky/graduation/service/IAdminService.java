@@ -2,6 +2,7 @@ package com.ky.graduation.service;
 
 import com.ky.graduation.entity.Admin;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ky.graduation.result.ResultVo;
 
 /**
  * <p>
@@ -13,4 +14,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IAdminService extends IService<Admin> {
 
+    /**
+     * 系统登陆
+     * @param username
+     * @param password
+     * @return
+     */
+    ResultVo login(String username, String password);
 }

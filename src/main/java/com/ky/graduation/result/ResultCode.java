@@ -13,6 +13,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ResultCode implements StatusCode {
 
+    //统一成功
     SUCCESS(200, "成功"),
 
     FAIL(1001, "后台错误"),
@@ -24,6 +25,8 @@ public enum ResultCode implements StatusCode {
     SQL_ERROR(1004, "数据库异常"),
 
     HTTP_ERROR(1005, "HTTP异常"),
+
+    NULL_POINT_ERROR(1006,"空指针异常")
     ;
 
     /**
