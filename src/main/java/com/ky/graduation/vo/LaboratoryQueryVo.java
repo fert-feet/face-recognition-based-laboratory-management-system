@@ -1,4 +1,4 @@
-package com.ky.graduation.Vo;
+package com.ky.graduation.vo;
 
 /**
  * @author: Ky2Fe

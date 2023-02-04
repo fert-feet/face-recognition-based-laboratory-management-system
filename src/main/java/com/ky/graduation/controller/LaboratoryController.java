@@ -38,4 +38,17 @@ public class LaboratoryController {
         return laboratoryService.listLab(page, limit, name,sort);
     }
 
+    /**
+     * 更新或新增实验室
+     * @param laboratory
+     * @return
+     */
+    @PostMapping("/createOrUpdate")
+    public ResultVo create(@RequestBody Laboratory laboratory) {
+        if (laboratoryService.saveOrUpdate(laboratory)) {
+            return ResultVo.success();
+        }
+        return ResultVo.error();
+    }
+
 }

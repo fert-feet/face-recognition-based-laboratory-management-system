@@ -33,13 +33,17 @@ public class Generator {
                             .pathInfo(Collections.singletonMap(OutputFile.xml, XML_DIR)); // 设置mapperXml生成路径
                 })
                 .strategyConfig(builder -> {
-                    builder.addInclude("admin","device","face","person","laboratory")// 设置需要生成的表名
+                    // 设置需要生成的表名
+                    builder.addInclude("admin","device","face","person","laboratory")
                             .entityBuilder()
-                            .enableLombok() //开启Lombok
+                            //开启Lombok
+                            .enableLombok()
                             .controllerBuilder()
-                            .enableRestStyle(); //开启RestController
+                            //开启RestController
+                            .enableRestStyle();
                 })
-                .templateEngine(new FreemarkerTemplateEngine()) // 使用Freemarker引擎模板，默认的是Velocity引擎模板
+                // 使用Freemarker引擎模板，默认的是Velocity引擎模板
+                .templateEngine(new FreemarkerTemplateEngine())
                 .execute();
     }
 }
