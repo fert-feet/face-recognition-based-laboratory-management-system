@@ -51,4 +51,16 @@ public class LaboratoryController {
         return ResultVo.error();
     }
 
+    /**
+     * 实验室删除功能
+     * @return
+     */
+    @PostMapping("/delete")
+    public ResultVo delete(int id) {
+        if (laboratoryService.removeById(id)) {
+            return ResultVo.success();
+        }
+        return ResultVo.error();
+    }
+
 }
