@@ -1,7 +1,10 @@
 package com.ky.graduation.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.ky.graduation.entity.Laboratory;
+import com.ky.graduation.result.ResultVo;
+import com.ky.graduation.service.ILaboratoryService;
+import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -14,5 +17,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/laboratory")
 public class LaboratoryController {
+
+    @Resource
+    private ILaboratoryService laboratoryService;
+
+    /**
+     * 实验室查询分页
+     * @param page
+     * @param limit
+     * @param name
+     * @param sort
+     * @return
+     */
+    @PostMapping("/list")
+    public ResultVo list(
+            long page,
+            long limit,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String sort) {
+        return laboratoryService.listLab(page, limit, name,sort);
+    }
 
 }
