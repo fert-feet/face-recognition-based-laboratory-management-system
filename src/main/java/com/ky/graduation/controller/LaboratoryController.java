@@ -63,4 +63,14 @@ public class LaboratoryController {
         return ResultVo.error();
     }
 
+    /**
+     * 查询实验室已授权的人数
+     * @param id
+     * @return
+     */
+    @PostMapping("/authenticated")
+    public ResultVo authenticatedPerson(int id) {
+        return laboratoryService.findAuthenticatedPerson(id);
+    }
+
 }

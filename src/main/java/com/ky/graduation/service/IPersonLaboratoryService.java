@@ -1,6 +1,6 @@
 package com.ky.graduation.service;
 
-import com.ky.graduation.entity.Person;
+import com.ky.graduation.entity.PersonLaboratory;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author Ky2Fe
  * @since 2023-02-05
  */
-public interface IPersonService extends IService<Person> {
+public interface IPersonLaboratoryService extends IService<PersonLaboratory> {
 
 }

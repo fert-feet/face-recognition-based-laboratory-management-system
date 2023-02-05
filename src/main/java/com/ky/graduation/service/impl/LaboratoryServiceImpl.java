@@ -5,12 +5,15 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ky.graduation.entity.Laboratory;
+import com.ky.graduation.entity.Person;
 import com.ky.graduation.mapper.LaboratoryMapper;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.ILaboratoryService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <p>
@@ -48,5 +51,11 @@ public class LaboratoryServiceImpl extends ServiceImpl<LaboratoryMapper, Laborat
         wrapper.orderByAsc(Laboratory::getId);
         Page<Laboratory> selectPage = laboratoryMapper.selectPage(labPage, wrapper);
         return ResultVo.success().data("items",selectPage.getRecords()).data("total",selectPage.getTotal());
+    }
+
+    @Override
+    public ResultVo findAuthenticatedPerson(int id) {
+        List<Person> personList = laboratoryMapper.findAuthenticatedPerson(id);
+        return ResultVo.success().data("total",personList.size()).data("authenticatedPerson",personList);
     }
 }

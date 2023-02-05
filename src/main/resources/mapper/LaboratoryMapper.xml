@@ -2,4 +2,19 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ky.graduation.mapper.LaboratoryMapper">
 
+
+    <select id="findAuthenticatedPerson" resultType="com.ky.graduation.entity.Person">
+        SELECT
+            *
+        FROM
+            person
+        WHERE
+                id IN (
+                SELECT
+                    p_id
+                FROM
+                    person_laboratory
+                WHERE
+                    lab_id = #{labId})
+    </select>
 </mapper>

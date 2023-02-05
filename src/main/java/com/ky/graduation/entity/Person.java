@@ -12,7 +12,7 @@ import lombok.Setter;
  * </p>
  *
  * @author Ky2Fe
- * @since 2023-02-01
+ * @since 2023-02-05
  */
 @Getter
 @Setter
@@ -39,5 +39,5 @@ public class Person implements Serializable {
     /**
      * 身份证号码，用于登录
      */
-    private Integer idNumber;
+    private String idNumber;
 }

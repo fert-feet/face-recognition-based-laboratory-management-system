@@ -1,6 +1,6 @@
 package com.ky.graduation.mapper;
 
-import com.ky.graduation.entity.Person;
+import com.ky.graduation.entity.PersonLaboratory;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author Ky2Fe
  * @since 2023-02-05
  */
-public interface PersonMapper extends BaseMapper<Person> {
+public interface PersonLaboratoryMapper extends BaseMapper<PersonLaboratory> {
 
 }

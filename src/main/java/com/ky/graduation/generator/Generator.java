@@ -25,7 +25,6 @@ public class Generator {
         FastAutoGenerator.create(URL, USER_NAME, PASS_WORD)
                 .globalConfig(builder -> {
                     builder.author(AUTHOR) // 设置作者
-                            .fileOverride() // 覆盖已生成文件
                             .outputDir(OUTPUT_DIR); // 指定输出目录
                 })
                 .packageConfig(builder -> {
@@ -34,7 +33,7 @@ public class Generator {
                 })
                 .strategyConfig(builder -> {
                     // 设置需要生成的表名
-                    builder.addInclude("admin","device","face","person","laboratory")
+                    builder.addInclude("person")
                             .entityBuilder()
                             //开启Lombok
                             .enableLombok()
