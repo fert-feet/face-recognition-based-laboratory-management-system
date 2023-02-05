@@ -2,6 +2,7 @@ package com.ky.graduation.service;
 
 import com.ky.graduation.entity.Person;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ky.graduation.result.ResultVo;
 
 /**
  * <p>
@@ -13,4 +14,13 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IPersonService extends IService<Person> {
 
+    /**
+     * 人员查询分页
+     * @param page
+     * @param limit
+     * @param name
+     * @param sort
+     * @return
+     */
+    ResultVo listPerson(long page, long limit, String name, String sort);
 }
