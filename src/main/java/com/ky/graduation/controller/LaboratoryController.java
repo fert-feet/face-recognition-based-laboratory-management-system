@@ -1,9 +1,11 @@
 package com.ky.graduation.controller;
 
 import com.ky.graduation.entity.Laboratory;
+import com.ky.graduation.entity.Person;
 import com.ky.graduation.entity.PersonLaboratory;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.ILaboratoryService;
+import com.ky.graduation.service.IPersonService;
 import com.ky.graduation.vo.CreatePersonAuthenticationVO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +24,6 @@ public class LaboratoryController {
 
     @Resource
     private ILaboratoryService laboratoryService;
-
     /**
      * 实验室查询分页
      * @param page

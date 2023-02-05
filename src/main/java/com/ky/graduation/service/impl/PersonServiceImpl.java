@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.ky.graduation.entity.Laboratory;
 import com.ky.graduation.entity.Person;
 import com.ky.graduation.mapper.PersonMapper;
 import com.ky.graduation.result.ResultVo;

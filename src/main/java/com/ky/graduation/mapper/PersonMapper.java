@@ -1,7 +1,7 @@
 package com.ky.graduation.mapper;
 
-import com.ky.graduation.entity.Person;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.ky.graduation.entity.Person;
 
 /**
  * <p>

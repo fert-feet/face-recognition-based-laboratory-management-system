@@ -2,9 +2,10 @@ package com.ky.graduation.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import java.io.Serializable;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serializable;
 
 /**
  * <p>
@@ -40,4 +41,9 @@ public class Person implements Serializable {
      * 身份证号码，用于登录
      */
     private String idNumber;
+
+    /**
+     * 是否已分配实验室权限
+     */
+    private Byte isDistributed;
 }

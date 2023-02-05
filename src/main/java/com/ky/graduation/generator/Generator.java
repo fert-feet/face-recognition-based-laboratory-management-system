@@ -17,9 +17,9 @@ public class Generator {
     public static final String USER_NAME = "root";
     public static final String PASS_WORD = "lwz7254591";
     public static final String AUTHOR = "Ky2Fe";
-    public static final String OUTPUT_DIR = "D:\\Project\\Graduate\\backend\\graduation\\src\\main\\java";
-    public static final String PARENT_DIR = "com.ky.graduation";
-    public static final String XML_DIR = "D:\\Project\\Graduate\\backend\\graduation\\src\\main\\resources\\mapper";
+    public static final String OUTPUT_DIR = "D:\\Project\\Graduate\\backend\\graduation\\src\\main\\java\\com\\ky\\graduation\\generator";
+    public static final String PARENT_DIR = "com";
+    public static final String XML_DIR = "D:\\Project\\Graduate\\backend\\graduation\\src\\main\\java\\com\\ky\\graduation\\generator\\com\\fxml";
 
     public static void main(String[] args) {
         FastAutoGenerator.create(URL, USER_NAME, PASS_WORD)
