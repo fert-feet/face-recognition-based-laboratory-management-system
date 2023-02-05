@@ -51,5 +51,18 @@ public class DeviceController {
         return ResultVo.error();
     }
 
+    /**
+     * 设备删除
+     * @param id
+     * @return
+     */
+    @PostMapping("/delete")
+    public ResultVo delete(int id) {
+        if (deviceService.removeById(id)) {
+            return ResultVo.success();
+        }
+        return ResultVo.error();
+    }
+
 
 }
