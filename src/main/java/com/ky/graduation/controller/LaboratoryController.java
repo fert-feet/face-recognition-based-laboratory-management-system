@@ -77,4 +77,15 @@ public class LaboratoryController {
         return laboratoryService.findAuthenticatedPerson(id,page,limit,name,sort);
     }
 
+    /**
+     * 取消某人进入实验室许可
+     * @param pId
+     * @param labId
+     * @return
+     */
+    @PostMapping("/cancelAuthentication")
+    public ResultVo cancelPersonAuthentication(int pId,int labId) {
+        return laboratoryService.cancelAuthentication(pId,labId);
+    }
+
 }

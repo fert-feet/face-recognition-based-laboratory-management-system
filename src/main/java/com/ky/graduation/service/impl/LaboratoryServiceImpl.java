@@ -6,7 +6,9 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ky.graduation.entity.Laboratory;
 import com.ky.graduation.entity.Person;
+import com.ky.graduation.entity.PersonLaboratory;
 import com.ky.graduation.mapper.LaboratoryMapper;
+import com.ky.graduation.mapper.PersonLaboratoryMapper;
 import com.ky.graduation.mapper.PersonMapper;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.ILaboratoryService;
@@ -30,6 +32,9 @@ public class LaboratoryServiceImpl extends ServiceImpl<LaboratoryMapper, Laborat
 
     @Resource
     private PersonMapper personMapper;
+
+    @Resource
+    private PersonLaboratoryMapper personLaboratoryMapper;
 
     /**
      * 按照id反向排列
@@ -74,5 +79,16 @@ public class LaboratoryServiceImpl extends ServiceImpl<LaboratoryMapper, Laborat
         wrapper.orderByAsc(Person::getId);
         Page<Person> selectPage = personMapper.selectPage(labPage, wrapper);
         return ResultVo.success().data("items",selectPage.getRecords()).data("total",selectPage.getTotal());
+    }
+
+    @Override
+    public ResultVo cancelAuthentication(int pId, int labId) {
+        LambdaQueryWrapper<PersonLaboratory> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(PersonLaboratory::getPId,pId).eq(PersonLaboratory::getLabId,labId);
+        int delete = personLaboratoryMapper.delete(wrapper);
+        if (delete > 0){
+            return ResultVo.success();
+        }
+        return ResultVo.error();
     }
 }

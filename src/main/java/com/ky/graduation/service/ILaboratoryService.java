@@ -36,4 +36,12 @@ public interface ILaboratoryService extends IService<Laboratory> {
      * @return
      */
     ResultVo findAuthenticatedPerson(int id, long page, long limit, String name, String sort);
+
+    /**
+     * 取消某人进入实验室许可
+     * @param pId
+     * @param labId
+     * @return
+     */
+    ResultVo cancelAuthentication(int pId, int labId);
 }
