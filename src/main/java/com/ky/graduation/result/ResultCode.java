@@ -26,7 +26,9 @@ public enum ResultCode implements StatusCode {
 
     HTTP_ERROR(1005, "HTTP异常"),
 
-    NULL_POINT_ERROR(1006,"空指针异常")
+    NULL_POINT_ERROR(1006,"空指针异常"),
+
+    EMPTY_QUERY(1007,"查询结果为空")
     ;
 
     /**

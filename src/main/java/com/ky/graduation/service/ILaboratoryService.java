@@ -2,7 +2,9 @@ package com.ky.graduation.service;
 
 import com.ky.graduation.entity.Laboratory;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ky.graduation.entity.PersonLaboratory;
 import com.ky.graduation.result.ResultVo;
+import com.ky.graduation.vo.CreatePersonAuthenticationVO;
 
 /**
  * <p>
@@ -38,10 +40,16 @@ public interface ILaboratoryService extends IService<Laboratory> {
     ResultVo findAuthenticatedPerson(int id, long page, long limit, String name, String sort);
 
     /**
-     * 取消某人进入实验室许可
-     * @param pId
-     * @param labId
+     * 取消实验室对某人的授权
+     * @param personLaboratory
      * @return
      */
-    ResultVo cancelAuthentication(int pId, int labId);
+    ResultVo cancelAuthentication(PersonLaboratory personLaboratory);
+
+    /**
+     * 新增实验室对某人的授权
+     * @param createVo
+     * @return
+     */
+    ResultVo createAuthentication(CreatePersonAuthenticationVO createVo);
 }

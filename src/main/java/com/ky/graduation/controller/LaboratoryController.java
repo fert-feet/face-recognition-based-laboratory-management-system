@@ -1,8 +1,10 @@
 package com.ky.graduation.controller;
 
 import com.ky.graduation.entity.Laboratory;
+import com.ky.graduation.entity.PersonLaboratory;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.ILaboratoryService;
+import com.ky.graduation.vo.CreatePersonAuthenticationVO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -78,14 +80,23 @@ public class LaboratoryController {
     }
 
     /**
-     * 取消某人进入实验室许可
-     * @param pId
-     * @param labId
+     * 取消本实验室对某人的授权
+     * @param personLaboratory
      * @return
      */
     @PostMapping("/cancelAuthentication")
-    public ResultVo cancelPersonAuthentication(int pId,int labId) {
-        return laboratoryService.cancelAuthentication(pId,labId);
+    public ResultVo cancelPersonAuthentication(@RequestBody PersonLaboratory personLaboratory) {
+        return laboratoryService.cancelAuthentication(personLaboratory);
+    }
+
+    /**
+     * 新增本实验室对某人的授权
+     * @param createVo
+     * @return
+     */
+    @PostMapping("/createAuthentication")
+    public ResultVo createPersonAuthentication(@RequestBody CreatePersonAuthenticationVO createVo) {
+        return laboratoryService.createAuthentication(createVo);
     }
 
 }

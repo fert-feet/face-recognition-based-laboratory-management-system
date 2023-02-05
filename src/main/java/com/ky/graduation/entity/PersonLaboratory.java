@@ -1,5 +1,7 @@
 package com.ky.graduation.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import lombok.Getter;
@@ -23,6 +25,7 @@ public class PersonLaboratory implements Serializable {
     /**
      * 中间表id
      */
+    @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
     /**
