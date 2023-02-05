@@ -27,8 +27,13 @@ public interface ILaboratoryService extends IService<Laboratory> {
 
     /**
      * 查询实验室已授权的人
+     *
      * @param id
+     * @param page
+     * @param limit
+     * @param name
+     * @param sort
      * @return
      */
-    ResultVo findAuthenticatedPerson(int id);
+    ResultVo findAuthenticatedPerson(int id, long page, long limit, String name, String sort);
 }

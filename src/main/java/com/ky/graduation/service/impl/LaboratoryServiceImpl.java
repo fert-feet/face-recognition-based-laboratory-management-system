@@ -7,13 +7,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ky.graduation.entity.Laboratory;
 import com.ky.graduation.entity.Person;
 import com.ky.graduation.mapper.LaboratoryMapper;
+import com.ky.graduation.mapper.PersonMapper;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.ILaboratoryService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * <p>
@@ -29,10 +28,15 @@ public class LaboratoryServiceImpl extends ServiceImpl<LaboratoryMapper, Laborat
     @Resource
     private LaboratoryMapper laboratoryMapper;
 
+    @Resource
+    private PersonMapper personMapper;
+
     /**
      * 按照id反向排列
      */
     private static final String SORT_REVERSE = "-id";
+
+    private static final String AUTHENTICATED_SQL = "SELECT p_id FROM person_laboratory WHERE lab_id=";
 
     @Override
     public ResultVo listLab(long page, long limit, String name, String sort) {
@@ -54,8 +58,21 @@ public class LaboratoryServiceImpl extends ServiceImpl<LaboratoryMapper, Laborat
     }
 
     @Override
-    public ResultVo findAuthenticatedPerson(int id) {
-        List<Person> personList = laboratoryMapper.findAuthenticatedPerson(id);
-        return ResultVo.success().data("total",personList.size()).data("authenticatedPerson",personList);
+    public ResultVo findAuthenticatedPerson(int id, long page, long limit, String name, String sort) {
+        Page<Person> labPage = new Page<>();
+        labPage.setCurrent(page);
+        labPage.setSize(limit);
+        LambdaQueryWrapper<Person> wrapper = Wrappers.lambdaQuery();
+        wrapper.inSql(Person::getId,AUTHENTICATED_SQL+id);
+        if (name != null && !StringUtils.isBlank(name)) {
+            wrapper.like(Person::getName, name);
+        }
+        if (sort != null && SORT_REVERSE.equals(sort)) {
+            // 倒序排列
+            wrapper.orderByDesc(Person::getId);
+        }
+        wrapper.orderByAsc(Person::getId);
+        Page<Person> selectPage = personMapper.selectPage(labPage, wrapper);
+        return ResultVo.success().data("items",selectPage.getRecords()).data("total",selectPage.getTotal());
     }
 }

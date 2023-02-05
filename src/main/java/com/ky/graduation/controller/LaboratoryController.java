@@ -64,13 +64,17 @@ public class LaboratoryController {
     }
 
     /**
-     * 查询实验室已授权的人数
+     * 查询实验室已授权的人
      * @param id
      * @return
      */
     @PostMapping("/authenticated")
-    public ResultVo authenticatedPerson(int id) {
-        return laboratoryService.findAuthenticatedPerson(id);
+    public ResultVo authenticatedPerson(int id,
+                                        long page,
+                                        long limit,
+                                        @RequestParam(required = false) String name,
+                                        @RequestParam(required = false) String sort) {
+        return laboratoryService.findAuthenticatedPerson(id,page,limit,name,sort);
     }
 
 }
