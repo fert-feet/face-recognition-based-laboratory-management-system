@@ -54,6 +54,7 @@ public class LaboratoryServiceImpl extends ServiceImpl<LaboratoryMapper, Laborat
         labPage.setSize(limit);
         LambdaQueryWrapper<Laboratory> wrapper = Wrappers.lambdaQuery();
         if (name != null && !StringUtils.isBlank(name)) {
+            // 根据实验室名称查询
             wrapper.like(Laboratory::getName, name);
         }
         if (SORT_REVERSE.equals(sort)) {

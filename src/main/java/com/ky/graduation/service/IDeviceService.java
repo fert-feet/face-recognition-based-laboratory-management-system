@@ -2,6 +2,7 @@ package com.ky.graduation.service;
 
 import com.ky.graduation.entity.Device;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ky.graduation.result.ResultVo;
 
 /**
  * <p>
@@ -13,4 +14,13 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IDeviceService extends IService<Device> {
 
+    /**
+     * 设备查询分页
+     * @param page
+     * @param limit
+     * @param labName
+     * @param sort
+     * @return
+     */
+    ResultVo listDevice(long page, long limit, String labName, String sort);
 }

@@ -1,7 +1,11 @@
 package com.ky.graduation.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.ky.graduation.entity.Device;
+import com.ky.graduation.entity.Laboratory;
+import com.ky.graduation.result.ResultVo;
+import com.ky.graduation.service.IDeviceService;
+import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -14,5 +18,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/device")
 public class DeviceController {
+
+    @Resource
+    private IDeviceService deviceService;
+    /**
+     * 设备查询分页
+     * @param page
+     * @param limit
+     * @param labName
+     * @param sort
+     * @return
+     */
+    @PostMapping("/list")
+    public ResultVo list(
+            long page,
+            long limit,
+            @RequestParam(required = false) String labName,
+            @RequestParam(required = false) String sort) {
+        return deviceService.listDevice(page, limit, labName,sort);
+    }
+
 
 }
