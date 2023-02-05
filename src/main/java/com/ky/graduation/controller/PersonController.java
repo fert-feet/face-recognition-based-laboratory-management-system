@@ -65,4 +65,22 @@ public class PersonController {
         return ResultVo.error();
     }
 
+    /**
+     * 查询已授权给该人员的实验室
+     * @param id
+     * @param page
+     * @param limit
+     * @param name
+     * @param sort
+     * @return
+     */
+    @PostMapping("/authenticated")
+    public ResultVo authenticatedPerson(int id,
+                                        long page,
+                                        long limit,
+                                        @RequestParam(required = false) String name,
+                                        @RequestParam(required = false) String sort) {
+        return personService.findAuthenticatedLab(id,page,limit,name,sort);
+    }
+
 }
