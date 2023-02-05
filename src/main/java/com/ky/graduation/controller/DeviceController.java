@@ -38,5 +38,18 @@ public class DeviceController {
         return deviceService.listDevice(page, limit, labName,sort);
     }
 
+    /**
+     * 更新或新增设备
+     * @param device
+     * @return
+     */
+    @PostMapping("/createOrUpdate")
+    public ResultVo create(@RequestBody Device device) {
+        if (deviceService.saveOrUpdate(device)) {
+            return ResultVo.success();
+        }
+        return ResultVo.error();
+    }
+
 
 }
