@@ -6,13 +6,21 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ky.graduation.entity.Laboratory;
 import com.ky.graduation.entity.Person;
+import com.ky.graduation.entity.PersonLaboratory;
 import com.ky.graduation.mapper.LaboratoryMapper;
+import com.ky.graduation.mapper.PersonLaboratoryMapper;
 import com.ky.graduation.mapper.PersonMapper;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IPersonService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ky.graduation.vo.AuthenticateLabToPersonVO;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import net.sf.jsqlparser.statement.insert.Insert;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -23,6 +31,7 @@ import org.springframework.stereotype.Service;
  * @since 2023-02-05
  */
 @Service
+@Slf4j
 public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> implements IPersonService {
 
     @Resource
@@ -30,6 +39,9 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
 
     @Resource
     private LaboratoryMapper laboratoryMapper;
+
+    @Resource
+    private PersonLaboratoryMapper personLaboratoryMapper;
 
     private static final String SORT_REVERSE = "-id";
 
@@ -73,5 +85,18 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
         wrapper.orderByAsc(Laboratory::getId);
         Page<Laboratory> selectPage = laboratoryMapper.selectPage(labPage, wrapper);
         return ResultVo.success().data("items",selectPage.getRecords()).data("total",selectPage.getTotal());
+    }
+
+    @Override
+    public ResultVo authenticateToPerson(AuthenticateLabToPersonVO authenticateVO) {
+        // 在person_laboratory中间表中添加记录
+        authenticateVO.getLabIdList().stream().forEach(labId ->{
+            // 每次循环都需要创建对象,不然会重复
+            PersonLaboratory personLaboratory = new PersonLaboratory();
+            personLaboratory.setPId(authenticateVO.getPersonId());
+            personLaboratory.setLabId(labId);
+            personLaboratoryMapper.insert(personLaboratory);
+        });
+        return ResultVo.success();
     }
 }

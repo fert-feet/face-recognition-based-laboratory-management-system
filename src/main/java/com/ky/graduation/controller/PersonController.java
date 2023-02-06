@@ -3,6 +3,7 @@ package com.ky.graduation.controller;
 import com.ky.graduation.entity.Person;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IPersonService;
+import com.ky.graduation.vo.AuthenticateLabToPersonVO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,12 +76,22 @@ public class PersonController {
      * @return
      */
     @PostMapping("/authenticated")
-    public ResultVo authenticatedPerson(int id,
+    public ResultVo authenticatedLab(int id,
                                         long page,
                                         long limit,
                                         @RequestParam(required = false) String name,
                                         @RequestParam(required = false) String sort) {
         return personService.findAuthenticatedLab(id,page,limit,name,sort);
+    }
+
+    /**
+     * 新增多个实验室对人员的许可
+     * @param authenticateVo
+     * @return
+     */
+    @PostMapping("/authenticateLabToPerson")
+    public ResultVo authenticateToPerson(@RequestBody AuthenticateLabToPersonVO authenticateVo) {
+        return personService.authenticateToPerson(authenticateVo);
     }
 
 }

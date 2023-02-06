@@ -3,6 +3,9 @@ package com.ky.graduation.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ky.graduation.entity.Person;
 import com.ky.graduation.result.ResultVo;
+import com.ky.graduation.vo.AuthenticateLabToPersonVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -34,4 +37,12 @@ public interface IPersonService extends IService<Person> {
      * @return
      */
     ResultVo findAuthenticatedLab(int id, long page, long limit, String name, String sort);
+
+    /**
+     * 新增多个实验室对人员的许可
+     *
+     * @param authenticateVO
+     * @return
+     */
+    ResultVo authenticateToPerson(AuthenticateLabToPersonVO authenticateVO);
 }
