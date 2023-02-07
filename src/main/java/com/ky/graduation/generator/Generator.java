@@ -33,7 +33,7 @@ public class Generator {
                 })
                 .strategyConfig(builder -> {
                     // 设置需要生成的表名
-                    builder.addInclude("person")
+                    builder.addInclude("face")
                             .entityBuilder()
                             //开启Lombok
                             .enableLombok()

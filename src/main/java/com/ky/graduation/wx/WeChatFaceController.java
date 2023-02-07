@@ -1,5 +1,7 @@
 package com.ky.graduation.wx;
 
+import com.ky.graduation.entity.Face;
+import com.ky.graduation.result.ResultCode;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IFaceService;
 import com.ky.graduation.vo.WeChatLoginVO;
@@ -33,4 +35,18 @@ public class WeChatFaceController {
     public ResultVo login(@RequestBody WeChatLoginVO weChatLoginVO) {
         return faceService.login(weChatLoginVO);
     }
+
+    /**
+     * 人脸录入接口
+     * @param face
+     * @return
+     */
+    @PostMapping("/createOrUpdateFace")
+    public ResultVo createOrUpdateFace(@RequestBody Face face) {
+        if (faceService.saveOrUpdate(face)){
+            return ResultVo.success();
+        }
+        return ResultVo.error();
+    }
+
 }

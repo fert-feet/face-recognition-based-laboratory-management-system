@@ -2,9 +2,10 @@ package com.ky.graduation.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import java.io.Serializable;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serializable;
 
 /**
  * <p>
@@ -12,7 +13,7 @@ import lombok.Setter;
  * </p>
  *
  * @author Ky2Fe
- * @since 2023-02-01
+ * @since 2023-02-08
  */
 @Getter
 @Setter
@@ -34,7 +35,7 @@ public class Face implements Serializable {
     /**
      * 人脸照片base64编码
      */
-    private String  imgBase64;
+    private String  imgEncode;
 
     /**
      * 是否不严格检测照片质量	false（默认）：严格	true：不严格	
