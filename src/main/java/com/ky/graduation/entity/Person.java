@@ -13,7 +13,7 @@ import java.io.Serializable;
  * </p>
  *
  * @author Ky2Fe
- * @since 2023-02-05
+ * @since 2023-02-07
  */
 @Getter
 @Setter
@@ -46,4 +46,9 @@ public class Person implements Serializable {
      * 是否已分配实验室权限
      */
     private Byte isDistributed;
+
+    /**
+     * 是否已设置人脸照片
+     */
+    private Byte isSetFace;
 }
