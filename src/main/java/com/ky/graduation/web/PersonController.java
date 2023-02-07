@@ -1,4 +1,4 @@
-package com.ky.graduation.controller;
+package com.ky.graduation.web;
 
 import com.ky.graduation.entity.Person;
 import com.ky.graduation.result.ResultVo;

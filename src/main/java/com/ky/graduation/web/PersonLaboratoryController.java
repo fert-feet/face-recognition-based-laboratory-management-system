@@ -1,4 +1,4 @@
-package com.ky.graduation.controller;
+package com.ky.graduation.web;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

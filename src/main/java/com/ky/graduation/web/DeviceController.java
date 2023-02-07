@@ -1,7 +1,6 @@
-package com.ky.graduation.controller;
+package com.ky.graduation.web;
 
 import com.ky.graduation.entity.Device;
-import com.ky.graduation.entity.Laboratory;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IDeviceService;
 import jakarta.annotation.Resource;

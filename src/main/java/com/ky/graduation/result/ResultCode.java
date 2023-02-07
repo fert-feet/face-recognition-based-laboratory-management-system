@@ -28,7 +28,9 @@ public enum ResultCode implements StatusCode {
 
     NULL_POINT_ERROR(1006,"空指针异常"),
 
-    EMPTY_QUERY(1007,"查询结果为空")
+    EMPTY_QUERY(1007,"查询结果为空"),
+
+    VALIDATE_ERROR(1008,"账号或密码错误")
     ;
 
     /**
