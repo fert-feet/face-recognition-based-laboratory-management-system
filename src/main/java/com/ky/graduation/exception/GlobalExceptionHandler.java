@@ -24,19 +24,6 @@ import java.sql.SQLException;
 public class GlobalExceptionHandler {
 
     /**
-     * 处理运行时异常
-     *
-     * @param e
-     * @return
-     */
-    @ExceptionHandler(value = RuntimeException.class)
-    @ResponseBody
-    public ResultVo runtimeExceptionHandler(RuntimeException e) {
-        log.error("运行时异常---{}", e.getMessage());
-        return ResultVo.error().status(ResultCode.RUNTIME_ERROR);
-    }
-
-    /**
      * 数据库异常
      * @param e
      * @return ResultVo

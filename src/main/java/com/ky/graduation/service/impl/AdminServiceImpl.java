@@ -27,7 +27,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
     @Override
     public ResultVo login(Admin admin) {
         LambdaQueryWrapper<Admin> wrapper = Wrappers.lambdaQuery();
-        wrapper.eq(Admin::getUserName,admin.getUserName());
+        wrapper.eq(Admin::getUsername,admin.getUsername());
         Admin user = adminMapper.selectOne(wrapper);
         if (user == null || !user.getPassword().equals(admin.getPassword())){
             return ResultVo.error().status(ResultCode.VALIDATE_ERROR);

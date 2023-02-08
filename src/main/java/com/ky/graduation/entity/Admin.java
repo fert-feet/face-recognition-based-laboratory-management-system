@@ -29,7 +29,7 @@ public class Admin implements Serializable {
     /**
      * 管理员账号
      */
-    private String userName;
+    private String username;
 
     /**
      * 管理员密码（md5加密）

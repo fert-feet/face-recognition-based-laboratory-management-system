@@ -1,5 +1,6 @@
 package com.ky.graduation.web;
 
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.ky.graduation.entity.Person;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IPersonService;
@@ -46,7 +47,11 @@ public class PersonController {
      */
     @PostMapping("/createOrUpdate")
     public ResultVo create(@RequestBody Person person) {
-        if (personService.saveOrUpdate(person)) {
+        // 若为新注册人员，则设置默认密码
+        if (StringUtils.isEmpty(person.getPassword())){
+            person.setPassword(person.getIdNumber());
+        }
+        if (personService.saveOrUpdate(person)){
             return ResultVo.success();
         }
         return ResultVo.error();
