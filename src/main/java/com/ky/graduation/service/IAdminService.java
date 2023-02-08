@@ -16,9 +16,8 @@ public interface IAdminService extends IService<Admin> {
 
     /**
      * 系统登陆
-     * @param username
-     * @param password
+     * @param admin
      * @return
      */
-    ResultVo login(String username, String password);
+    ResultVo login(Admin admin);
 }

@@ -1,10 +1,12 @@
 package com.ky.graduation.web;
 
+import com.ky.graduation.entity.Admin;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IAdminService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,13 +29,12 @@ public class AdminController {
     /**
      * 系统登录
      *
-     * @param username
-     * @param password
+     * @param admin
      * @return
      */
     @PostMapping("/login")
-    public ResultVo login(String username,String password) {
-        return adminService.login(username,password);
+    public ResultVo login(@RequestBody Admin admin) {
+        return adminService.login(admin);
     }
 
     /**
