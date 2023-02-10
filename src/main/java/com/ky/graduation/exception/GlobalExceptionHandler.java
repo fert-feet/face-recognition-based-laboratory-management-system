@@ -90,4 +90,17 @@ public class GlobalExceptionHandler {
         log.error("HTTP异常---{}", e.getMessage());
         return ResultVo.error().status(ResultCode.HTTP_ERROR);
     }
+
+    /**
+     * 处理传入参数异常
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = IllegalStateException.class)
+    @ResponseBody
+    public ResultVo IllegalStateExceptionHandler(IllegalStateException e) {
+        //获取错误信息
+        log.error("传入参数异常---{}", e.getMessage());
+        return ResultVo.error().status(ResultCode.PARAMS_ERROR);
+    }
 }

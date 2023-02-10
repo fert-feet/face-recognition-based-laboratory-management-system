@@ -30,7 +30,9 @@ public enum ResultCode implements StatusCode {
 
     EMPTY_QUERY(1007,"查询结果为空"),
 
-    VALIDATE_ERROR(1008,"账号或密码错误")
+    VALIDATE_ERROR(1008,"账号或密码错误"),
+
+    PARAMS_ERROR(1009,"传入参数异常"),
     ;
 
     /**
