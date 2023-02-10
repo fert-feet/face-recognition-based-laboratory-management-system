@@ -5,8 +5,6 @@ import com.ky.graduation.entity.Person;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.vo.AuthenticateLabToPersonVO;
 
-import java.util.List;
-
 /**
  * <p>
  *  服务类
@@ -29,14 +27,11 @@ public interface IPersonService extends IService<Person> {
 
     /**
      * 查询已授权给该人员的实验室
+     *
      * @param id
-     * @param page
-     * @param limit
-     * @param name
-     * @param sort
      * @return
      */
-    ResultVo findAuthenticatedLab(int id, long page, long limit, String name, String sort);
+    ResultVo findAuthenticatedLab(int id);
 
     /**
      * 新增多个实验室对人员的许可

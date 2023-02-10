@@ -8,6 +8,8 @@ import com.ky.graduation.vo.CreatePersonAuthenticationVO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * <p>
  *  前端控制器
@@ -30,13 +32,23 @@ public class LaboratoryController {
      * @param sort
      * @return
      */
-    @PostMapping("/list")
+    @PostMapping("/listPage")
     public ResultVo list(
             long page,
             long limit,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String sort) {
         return laboratoryService.listLab(page, limit, name,sort);
+    }
+
+    /**
+     * 实验室不分页查询
+     * @return
+     */
+    @GetMapping("/list")
+    public ResultVo list() {
+        List<Laboratory> labList = laboratoryService.list();
+        return ResultVo.success().data("labList",labList);
     }
 
     /**

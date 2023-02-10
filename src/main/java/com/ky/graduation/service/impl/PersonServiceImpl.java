@@ -16,10 +16,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ky.graduation.vo.AuthenticateLabToPersonVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jsqlparser.statement.insert.Insert;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -69,22 +67,12 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
     }
 
     @Override
-    public ResultVo findAuthenticatedLab(int id, long page, long limit, String name, String sort) {
-        Page<Laboratory> labPage = new Page<>();
-        labPage.setCurrent(page);
-        labPage.setSize(limit);
+    public ResultVo findAuthenticatedLab(int id) {
         LambdaQueryWrapper<Laboratory> wrapper = Wrappers.lambdaQuery();
+        // IN语句查询授权给人员的实验室
         wrapper.inSql(Laboratory::getId,AUTHENTICATED_SQL+id);
-        if (name != null && !StringUtils.isBlank(name)) {
-            wrapper.like(Laboratory::getName, name);
-        }
-        if (SORT_REVERSE.equals(sort)) {
-            // 倒序排列
-            wrapper.orderByDesc(Laboratory::getId);
-        }
-        wrapper.orderByAsc(Laboratory::getId);
-        Page<Laboratory> selectPage = laboratoryMapper.selectPage(labPage, wrapper);
-        return ResultVo.success().data("items",selectPage.getRecords()).data("total",selectPage.getTotal());
+        List<Laboratory> laboratories = laboratoryMapper.selectList(wrapper);
+        return ResultVo.success().data("authorizedLabList",laboratories);
     }
 
     @Override
