@@ -22,4 +22,10 @@ public interface IFaceService extends IService<Face> {
      */
     ResultVo login(WeChatLoginVO weChatLoginVO);
 
+    /**
+     * 查询人员人脸数据
+     * @param personId
+     * @return
+     */
+    ResultVo findPersonFace(int personId);
 }

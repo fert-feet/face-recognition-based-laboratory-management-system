@@ -15,6 +15,8 @@ import com.ky.graduation.vo.WeChatLoginVO;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * <p>
  *  服务实现类
@@ -29,6 +31,9 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
     @Resource
     private PersonMapper personMapper;
 
+    @Resource
+    private FaceMapper faceMapper;
+
     @Override
     public ResultVo login(WeChatLoginVO weChatLoginVO) {
         LambdaQueryWrapper<Person> wrapper = Wrappers.lambdaQuery();
@@ -39,5 +44,13 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
         }
         // 成功并返回个人信息
         return ResultVo.success().data("personInfo",person);
+    }
+
+    @Override
+    public ResultVo findPersonFace(int personId) {
+        LambdaQueryWrapper<Face> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(Face::getPersonId,personId);
+        List<Face> faceList = faceMapper.selectList(wrapper);
+        return ResultVo.success().data("faceList",faceList);
     }
 }

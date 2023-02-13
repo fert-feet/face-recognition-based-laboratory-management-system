@@ -108,11 +108,4 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
         return ResultVo.success();
     }
 
-    @Override
-    public ResultVo findPersonFace(int personId) {
-        LambdaQueryWrapper<Face> wrapper = Wrappers.lambdaQuery();
-        wrapper.eq(Face::getPersonId,personId);
-        List<Face> faceList = faceMapper.selectList(wrapper);
-        return ResultVo.success().data("faceList",faceList);
-    }
 }
