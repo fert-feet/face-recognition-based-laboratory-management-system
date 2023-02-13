@@ -77,13 +77,28 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
 
     @Override
     public ResultVo authenticateToPerson(AuthenticateLabToPersonVO authenticateVO) {
-        // 在person_laboratory中间表中添加记录
-        authenticateVO.getLabIdList().stream().forEach(labId ->{
-            // 每次循环都需要创建对象,不然会重复
+        // 首先将对应人员分配的实验室都删除
+        LambdaQueryWrapper<PersonLaboratory> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(PersonLaboratory::getPId,authenticateVO.getPersonId());
+        personLaboratoryMapper.delete(wrapper);
+        Person person = new Person();
+        // 传入的实验室id列表为空时，只更改人员分配状态
+        if (authenticateVO.getLabIdList().size() == 0){
+            person.setId(authenticateVO.getPersonId());
+            person.setIsDistributed((byte) 0);
+            personMapper.updateById(person);
+            return ResultVo.success();
+        }
+        // id列表不为空时，循环插入数据库
+        authenticateVO.getLabIdList().forEach(labId -> {
+            // 每个循环都需要创建对象
             PersonLaboratory personLaboratory = new PersonLaboratory();
             personLaboratory.setPId(authenticateVO.getPersonId());
             personLaboratory.setLabId(labId);
             personLaboratoryMapper.insert(personLaboratory);
+            person.setId(authenticateVO.getPersonId());
+            person.setIsDistributed((byte) 1);
+            personMapper.updateById(person);
         });
         return ResultVo.success();
     }
