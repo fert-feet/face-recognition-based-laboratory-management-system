@@ -33,6 +33,8 @@ public enum ResultCode implements StatusCode {
     VALIDATE_ERROR(1008,"账号或密码错误"),
 
     PARAMS_ERROR(1009,"传入参数异常"),
+
+    PARAMS_TYPE_ERROR(1010,"传入参数类型异常"),
     ;
 
     /**

@@ -10,6 +10,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.sql.SQLException;
 
@@ -92,7 +93,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 处理传入参数异常
+     * 处理传入参数空缺异常
      * @param e
      * @return
      */
@@ -100,7 +101,22 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ResultVo IllegalStateExceptionHandler(IllegalStateException e) {
         //获取错误信息
-        log.error("传入参数异常---{}", e.getMessage());
+        log.error("传入参数空缺---{}", e.getMessage());
         return ResultVo.error().status(ResultCode.PARAMS_ERROR);
     }
+
+    /**
+     * 处理传入参数异常
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = MethodArgumentTypeMismatchException.class)
+    @ResponseBody
+    public ResultVo methodArgumentTypeMismatchExceptionHandler(MethodArgumentTypeMismatchException e) {
+        //获取错误信息
+        log.error("传入参数类型异常---{}", e.getMessage());
+        return ResultVo.error().status(ResultCode.PARAMS_TYPE_ERROR);
+    }
+
+
 }

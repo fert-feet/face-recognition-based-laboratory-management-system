@@ -91,4 +91,13 @@ public class PersonController {
         return personService.authenticateToPerson(authenticateVo);
     }
 
+    /**
+     * 查询人员人脸数据
+     * @param personId
+     * @return
+     */
+    @GetMapping("/face")
+    public ResultVo findPersonFace(int personId) {
+        return personService.findPersonFace(personId);
+    }
 }

@@ -41,4 +41,9 @@ public class Face implements Serializable {
      * 是否不严格检测照片质量	false（默认）：严格	true：不严格	
      */
     private Byte isEasyWay;
+
+    /**
+     * 人脸照片外链
+     */
+    private String imgUrl;
 }

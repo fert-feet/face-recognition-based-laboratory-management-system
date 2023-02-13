@@ -40,4 +40,11 @@ public interface IPersonService extends IService<Person> {
      * @return
      */
     ResultVo authenticateToPerson(AuthenticateLabToPersonVO authenticateVO);
+
+    /**
+     * 查询人员人脸数据
+     * @param personId
+     * @return
+     */
+    ResultVo findPersonFace(int personId);
 }

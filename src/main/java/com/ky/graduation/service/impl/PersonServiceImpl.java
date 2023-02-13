@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ky.graduation.entity.Face;
 import com.ky.graduation.entity.Laboratory;
 import com.ky.graduation.entity.Person;
 import com.ky.graduation.entity.PersonLaboratory;
+import com.ky.graduation.mapper.FaceMapper;
 import com.ky.graduation.mapper.LaboratoryMapper;
 import com.ky.graduation.mapper.PersonLaboratoryMapper;
 import com.ky.graduation.mapper.PersonMapper;
@@ -37,6 +39,9 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
 
     @Resource
     private LaboratoryMapper laboratoryMapper;
+
+    @Resource
+    private FaceMapper faceMapper;
 
     @Resource
     private PersonLaboratoryMapper personLaboratoryMapper;
@@ -101,5 +106,13 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
             personMapper.updateById(person);
         });
         return ResultVo.success();
+    }
+
+    @Override
+    public ResultVo findPersonFace(int personId) {
+        LambdaQueryWrapper<Face> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(Face::getPersonId,personId);
+        List<Face> faceList = faceMapper.selectList(wrapper);
+        return ResultVo.success().data("faceList",faceList);
     }
 }
