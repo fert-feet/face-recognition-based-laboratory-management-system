@@ -91,6 +91,16 @@ public class LaboratoryController {
     }
 
     /**
+     * 查询实验室已授权人员不分页
+     * @param id
+     * @return
+     */
+    @PostMapping("/authenticatedList")
+    public ResultVo authenticatedPersonList(int id) {
+        return laboratoryService.findAuthenticatedPersonList(id);
+    }
+
+    /**
      * 取消本实验室对某人的授权
      * @param personLaboratory
      * @return

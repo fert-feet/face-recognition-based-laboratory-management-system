@@ -133,4 +133,14 @@ public class LaboratoryServiceImpl extends ServiceImpl<LaboratoryMapper, Laborat
         }
         return ResultVo.error();
     }
+
+
+    @Override
+    public ResultVo findAuthenticatedPersonList(int id) {
+        LambdaQueryWrapper<Person> wrapper = Wrappers.lambdaQuery();
+        wrapper.inSql(Person::getId,AUTHENTICATED_SQL + id);
+        List<Person> personList = personMapper.selectList(wrapper);
+        log.info(personList.toString());
+        return ResultVo.success().data("personList", personList);
+    }
 }

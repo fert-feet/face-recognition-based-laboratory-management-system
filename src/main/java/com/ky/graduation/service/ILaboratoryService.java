@@ -52,4 +52,11 @@ public interface ILaboratoryService extends IService<Laboratory> {
      * @return
      */
     ResultVo createAuthentication(CreatePersonAuthenticationVO createVo);
+
+    /**
+     * 查询实验室已授权人员不分页
+     * @param id
+     * @return
+     */
+    ResultVo findAuthenticatedPersonList(int id);
 }
