@@ -4,3 +4,12 @@ spring:
     username: root
     password: lwz7254591
     url: jdbc:mysql://localhost:3306/ky_graduate?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
+
+tencent:
+  cos:
+    file:
+      secretId: AKIDFLUWHm10jCOK0PWZN8kEh3KPHtGMF8tR
+      secretKey: OYVDrLceR0KOTaXEiyzkGj4D8FHE0oQy
+      bucketName: ky2fe-1316858065
+      regionName: ap-chengdu
+      cosHost: https://ky2fe-1316858065.cos.ap-chengdu.myqcloud.com
