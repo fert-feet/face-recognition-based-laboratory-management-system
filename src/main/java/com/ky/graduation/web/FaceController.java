@@ -1,13 +1,17 @@
 package com.ky.graduation.web;
 
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IFaceService;
 import com.ky.graduation.service.IPersonService;
+import com.ky.graduation.utils.CosRequest;
+import com.qcloud.cos.model.PutObjectResult;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * <p>
@@ -32,5 +36,17 @@ public class FaceController {
     @GetMapping("/list")
     public ResultVo findPersonFace(int personId) {
         return faceService.findPersonFace(personId);
+    }
+
+    /**
+     * 人脸上传
+     *
+     * @param img
+     * @return
+     * @throws IOException
+     */
+    @PostMapping("/upload")
+    public ResultVo faceUpload(@RequestPart("file") MultipartFile img, int personId) throws IOException {
+        return faceService.faceUpload(img,personId);
     }
 }

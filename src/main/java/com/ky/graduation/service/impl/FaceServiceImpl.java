@@ -8,13 +8,17 @@ import com.ky.graduation.mapper.FaceMapper;
 import com.ky.graduation.mapper.PersonMapper;
 import com.ky.graduation.result.ResultCode;
 import com.ky.graduation.result.ResultVo;
-import com.ky.graduation.result.StatusCode;
 import com.ky.graduation.service.IFaceService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ky.graduation.utils.CosRequest;
+import com.ky.graduation.vo.CosConfig;
 import com.ky.graduation.vo.WeChatLoginVO;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -26,7 +30,14 @@ import java.util.List;
  * @since 2023-02-01
  */
 @Service
+@Slf4j
 public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IFaceService {
+
+    @Resource
+    private CosConfig cosConfig;
+
+    @Resource
+    private CosRequest cosRequest;
 
     @Resource
     private PersonMapper personMapper;
@@ -52,5 +63,21 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
         wrapper.eq(Face::getPersonId,personId);
         List<Face> faceList = faceMapper.selectList(wrapper);
         return ResultVo.success().data("faceList",faceList);
+    }
+
+    @Override
+    public ResultVo faceUpload(MultipartFile img, int personId) throws IOException {
+        // 上传tx存储
+        String faceUrl = cosRequest.putObject(img);
+        Face face = new Face();
+        face.setImgUrl(faceUrl);
+        face.setPersonId(personId);
+        // 人脸传到数据库
+        if (faceMapper.insert(face) > 0){
+            // 对接人脸机需要id
+            log.info("插入---{}",face.getFaceId());
+            return ResultVo.success().data("faceUrl",faceUrl);
+        }
+        return ResultVo.error();
     }
 }

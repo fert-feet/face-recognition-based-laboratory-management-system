@@ -2,6 +2,8 @@ package com.ky.graduation.exception;
 
 import com.ky.graduation.result.ResultCode;
 import com.ky.graduation.result.ResultVo;
+import com.qcloud.cos.exception.CosClientException;
+import com.qcloud.cos.exception.CosServiceException;
 import jakarta.servlet.ServletException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindException;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 /**
@@ -117,6 +120,47 @@ public class GlobalExceptionHandler {
         log.error("传入参数类型异常---{}", e.getMessage());
         return ResultVo.error().status(ResultCode.PARAMS_TYPE_ERROR);
     }
+
+    /**
+     * 处理COS客户端异常
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = CosClientException.class)
+    @ResponseBody
+    public ResultVo cosClientExceptionHandler(CosClientException e) {
+        //获取错误信息
+        log.error("COS客户端异常---{}", e.getMessage());
+        return ResultVo.error().status(ResultCode.COS_CLIENT_ERROR);
+    }
+
+    /**
+     * 处理COS服务端异常
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = CosServiceException.class)
+    @ResponseBody
+    public ResultVo cosServiceExceptionHandler(CosServiceException e) {
+        //获取错误信息
+        log.error("COS服务端异常---{}", e.getMessage());
+        return ResultVo.error().status(ResultCode.COS_SERVICE_ERROR);
+    }
+
+    /**
+     * 处理IO异常
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = IOException.class)
+    @ResponseBody
+    public ResultVo iOExceptionHandler(IOException e) {
+        //获取错误信息
+        log.error("IO异常---{}", e.getMessage());
+        return ResultVo.error().status(ResultCode.COS_SERVICE_ERROR);
+    }
+
+
 
 
 }
