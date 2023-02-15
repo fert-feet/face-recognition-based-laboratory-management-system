@@ -41,4 +41,11 @@ public interface IFaceService extends IService<Face> {
      * @throws IOException
      */
     ResultVo faceUpload(MultipartFile img, int personId) throws IOException;
+
+    /**
+     * 照片删除
+     * @param faceId
+     * @return
+     */
+    ResultVo deleteFace(int faceId);
 }

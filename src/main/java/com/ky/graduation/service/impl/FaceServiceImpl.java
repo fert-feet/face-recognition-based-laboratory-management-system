@@ -67,17 +67,31 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
 
     @Override
     public ResultVo faceUpload(MultipartFile img, int personId) throws IOException {
-        // 上传tx存储
-        String faceUrl = cosRequest.putObject(img);
+        // 上传COS存储
+        String key = cosRequest.putObject(img);
+        // 拼接人脸链接
+        String faceUrl = cosConfig.getCosHost() + "/" + key;
         Face face = new Face();
         face.setImgUrl(faceUrl);
         face.setPersonId(personId);
+        face.setImgKey(key);
         // 人脸传到数据库
         if (faceMapper.insert(face) > 0){
             // 对接人脸机需要id
             log.info("插入---{}",face.getFaceId());
-            return ResultVo.success().data("faceUrl",faceUrl);
+            return ResultVo.success().data("faceUrl",faceUrl).data("faceKey",key).data("faceId",face.getFaceId());
         }
         return ResultVo.error();
+    }
+
+    @Override
+    public ResultVo deleteFace(int faceId) {
+        Face face = faceMapper.selectById(faceId);
+        if (faceMapper.deleteById(faceId) <= 0){
+            return ResultVo.error();
+        }
+        // 根据key删除云端照片
+        cosRequest.deleteObject(face.getImgKey());
+        return ResultVo.success();
     }
 }

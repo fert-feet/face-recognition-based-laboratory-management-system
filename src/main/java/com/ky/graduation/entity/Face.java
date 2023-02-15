@@ -46,4 +46,9 @@ public class Face implements Serializable {
      * 人脸照片外链
      */
     private String imgUrl;
+
+    /**
+     * 人脸照片全名，包括后缀
+     */
+    private String imgKey;
 }

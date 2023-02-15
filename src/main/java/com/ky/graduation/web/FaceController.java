@@ -49,4 +49,14 @@ public class FaceController {
     public ResultVo faceUpload(@RequestPart("file") MultipartFile img, int personId) throws IOException {
         return faceService.faceUpload(img,personId);
     }
+
+    /**
+     * 照片删除
+     * @param faceId
+     * @return
+     */
+    @PostMapping("/delete")
+    public ResultVo delete(int faceId) {
+        return faceService.deleteFace(faceId);
+    }
 }

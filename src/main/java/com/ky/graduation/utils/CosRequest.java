@@ -9,6 +9,7 @@ import com.qcloud.cos.model.PutObjectRequest;
 import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.region.Region;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +23,7 @@ import java.io.IOException;
  **/
 
 @Component
+@Slf4j
 public class CosRequest {
 
     @Resource
@@ -43,13 +45,19 @@ public class CosRequest {
         // 文件类型转换，spring只能接收MultipartFile类型图片
         File imgFile = FileUtils.multipartFileToFile(imgMultiFile);
         String key = imgFile.getName();
-        PutObjectRequest putRequest = new PutObjectRequest(cosConfig.getBucketName(), key, imgFile);
-        PutObjectResult putResult = cosClient.putObject(putRequest);
-        // 释放资源
+        log.info("fileName---{}",key);
+        // 上传COS存储
+        cosClient.putObject(cosConfig.getBucketName(),key,imgFile);
         cosClient.shutdown();
-        // 拼接人脸链接
-        String faceUrl = cosConfig.getCosHost() + "/" + key;
-        return faceUrl;
+        // 返回生成的文件名（包括后缀）
+        return key;
+    }
+
+    public boolean deleteObject(String key){
+        COSClient cosClient = initCosClient();
+        cosClient.deleteObject(cosConfig.getBucketName(),key);
+        cosClient.shutdown();
+        return true;
     }
 
 }
