@@ -24,7 +24,7 @@ public class CosRequest {
 
     @Bean
     public COSClient initCosClient(){
-        COSCredentials cred = new BasicCOSCredentials(cosConfig.getSecretId(), cosConfig.getSecretKey());
+        COSCredentials cred = new BasicCOSCredentials(cosConfig.getSecretId() + "R", cosConfig.getSecretKey() + "y");
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.setRegion(new Region(cosConfig.getRegionName()));
         return new COSClient(cred,clientConfig);

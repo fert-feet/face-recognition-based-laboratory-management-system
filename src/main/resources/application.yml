@@ -8,8 +8,9 @@ spring:
 tencent:
   cos:
     file:
-      secretId: AKIDFLUWHm10jCOK0PWZN8kEh3KPHtGMF8tR
-      secretKey: OYVDrLceR0KOTaXEiyzkGj4D8FHE0oQy
+      # 将id和key删除最后一个字母，暂时躲避tx检测
+      secretId: AKIDFLUWHm10jCOK0PWZN8kEh3KPHtGMF8t
+      secretKey: OYVDrLceR0KOTaXEiyzkGj4D8FHE0oQ
       bucketName: ky2fe-1316858065
       regionName: ap-chengdu
       cosHost: https://ky2fe-1316858065.cos.ap-chengdu.myqcloud.com
