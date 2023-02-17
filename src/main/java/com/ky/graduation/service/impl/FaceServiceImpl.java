@@ -67,17 +67,23 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
 
     @Override
     public ResultVo faceUpload(MultipartFile img, int personId) throws IOException {
+        log.error("imgName---{}",img.getOriginalFilename());
+        log.error("personId---{}",personId);
         // 上传COS存储
         String key = cosRequest.putObject(img);
         // 拼接人脸链接
         String faceUrl = cosConfig.getCosHost() + "/" + key;
         Face face = new Face();
-        face.setImgUrl(faceUrl);
+        face.setUrl(faceUrl);
         face.setPersonId(personId);
-        face.setImgKey(key);
+        face.setName(key);
         // 人脸传到数据库
         if (faceMapper.insert(face) > 0){
-            // 对接人脸机需要id
+            // 将是否设置人脸变为已设置
+            Person person = new Person();
+            person.setId(personId);
+            person.setIsSetFace((byte) 1);
+            personMapper.updateById(person);
             log.info("插入---{}",face.getFaceId());
             return ResultVo.success().data("faceUrl",faceUrl).data("faceKey",key).data("faceId",face.getFaceId());
         }
@@ -85,13 +91,23 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
     }
 
     @Override
-    public ResultVo deleteFace(int faceId) {
+    public ResultVo deleteFace(int faceId, int personId) {
         Face face = faceMapper.selectById(faceId);
-        if (faceMapper.deleteById(faceId) <= 0){
+        if (faceMapper.deleteById(faceId) < 1){
             return ResultVo.error();
         }
+        // 若该人员已经没有人脸，则改变人脸设置状态
+        LambdaQueryWrapper<Face> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(Face::getPersonId,personId);
+        List<Face> faceList = faceMapper.selectList(wrapper);
+        if (faceList.size() == 0) {
+            Person person = new Person();
+            person.setId(personId);
+            person.setIsSetFace((byte) 0);
+            personMapper.updateById(person);
+        }
         // 根据key删除云端照片
-        cosRequest.deleteObject(face.getImgKey());
+        cosRequest.deleteObject(face.getName());
         return ResultVo.success();
     }
 }

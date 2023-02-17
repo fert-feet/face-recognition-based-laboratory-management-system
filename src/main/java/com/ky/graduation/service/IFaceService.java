@@ -44,8 +44,10 @@ public interface IFaceService extends IService<Face> {
 
     /**
      * 照片删除
+     *
      * @param faceId
+     * @param personId
      * @return
      */
-    ResultVo deleteFace(int faceId);
+    ResultVo deleteFace(int faceId, int personId);
 }

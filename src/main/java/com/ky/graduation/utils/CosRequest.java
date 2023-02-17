@@ -45,7 +45,6 @@ public class CosRequest {
         // 文件类型转换，spring只能接收MultipartFile类型图片
         File imgFile = FileUtils.multipartFileToFile(imgMultiFile);
         String key = imgFile.getName();
-        log.info("fileName---{}",key);
         // 上传COS存储
         cosClient.putObject(cosConfig.getBucketName(),key,imgFile);
         cosClient.shutdown();

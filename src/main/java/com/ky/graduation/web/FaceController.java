@@ -46,17 +46,18 @@ public class FaceController {
      * @throws IOException
      */
     @PostMapping("/upload")
-    public ResultVo faceUpload(@RequestPart("file") MultipartFile img, int personId) throws IOException {
-        return faceService.faceUpload(img,personId);
+    public ResultVo faceUpload(MultipartFile img, int personId) throws IOException {
+        return faceService.faceUpload(img, personId);
     }
 
     /**
      * 照片删除
      * @param faceId
+     * @param personId
      * @return
      */
     @PostMapping("/delete")
-    public ResultVo delete(int faceId) {
-        return faceService.deleteFace(faceId);
+    public ResultVo delete(int faceId,int personId) {
+        return faceService.deleteFace(faceId,personId);
     }
 }
