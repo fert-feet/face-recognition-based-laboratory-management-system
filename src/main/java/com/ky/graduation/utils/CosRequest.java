@@ -5,8 +5,6 @@ import com.qcloud.cos.COSClient;
 import com.qcloud.cos.ClientConfig;
 import com.qcloud.cos.auth.BasicCOSCredentials;
 import com.qcloud.cos.auth.COSCredentials;
-import com.qcloud.cos.model.PutObjectRequest;
-import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.region.Region;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author: Ky2Fe
@@ -40,16 +40,22 @@ public class CosRequest {
         return new COSClient(cred,clientConfig);
     }
 
-    public String putObject(MultipartFile imgMultiFile) throws IOException {
+    public LinkedList<String> putObject(List<MultipartFile> imgMultiFileList) throws IOException {
         COSClient cosClient = initCosClient();
         // 文件类型转换，spring只能接收MultipartFile类型图片
-        File imgFile = FileUtils.multipartFileToFile(imgMultiFile);
-        String key = imgFile.getName();
-        // 上传COS存储
-        cosClient.putObject(cosConfig.getBucketName(),key,imgFile);
+        LinkedList<File> imgFileList = FileUtils.multipartFileToFile(imgMultiFileList);
+        // 存储key
+        LinkedList<String> keyLinkedList = new LinkedList<>();
+        imgFileList.forEach(imgFile -> {
+            String key = imgFile.getName();
+            // 上传COS存储
+            cosClient.putObject(cosConfig.getBucketName(),key,imgFile);
+            keyLinkedList.add(key);
+        });
+        log.info("keyList---{}", keyLinkedList);
         cosClient.shutdown();
         // 返回生成的文件名（包括后缀）
-        return key;
+        return keyLinkedList;
     }
 
     public boolean deleteObject(String key){

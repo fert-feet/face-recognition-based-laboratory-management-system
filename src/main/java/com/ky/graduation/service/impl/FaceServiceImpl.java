@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -66,28 +67,28 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
     }
 
     @Override
-    public ResultVo faceUpload(MultipartFile img, int personId) throws IOException {
-        log.error("imgName---{}",img.getOriginalFilename());
-        log.error("personId---{}",personId);
+    public ResultVo faceUpload(List<MultipartFile> imgList, int personId) throws IOException {
+        log.info("personId---{}",personId);
         // 上传COS存储
-        String key = cosRequest.putObject(img);
+        LinkedList<String> keyList = cosRequest.putObject(imgList);
         // 拼接人脸链接
-        String faceUrl = cosConfig.getCosHost() + "/" + key;
-        Face face = new Face();
-        face.setUrl(faceUrl);
-        face.setPersonId(personId);
-        face.setName(key);
-        // 人脸传到数据库
-        if (faceMapper.insert(face) > 0){
-            // 将是否设置人脸变为已设置
-            Person person = new Person();
-            person.setId(personId);
-            person.setIsSetFace((byte) 1);
-            personMapper.updateById(person);
-            log.info("插入---{}",face.getFaceId());
-            return ResultVo.success().data("faceUrl",faceUrl).data("faceKey",key).data("faceId",face.getFaceId());
-        }
-        return ResultVo.error();
+        keyList.forEach(key -> {
+            String faceUrl = cosConfig.getCosHost() + "/" + key;
+            Face face = new Face();
+            face.setUrl(faceUrl);
+            face.setPersonId(personId);
+            face.setName(key);
+            // 人脸传到数据库
+            if (faceMapper.insert(face) > 0){
+                log.info("插入---{}",face.getFaceId());
+            }
+        });
+        // 将是否设置人脸变为已设置
+        Person person = new Person();
+        person.setId(personId);
+        person.setIsSetFace((byte) 1);
+        personMapper.updateById(person);
+        return ResultVo.success();
     }
 
     @Override

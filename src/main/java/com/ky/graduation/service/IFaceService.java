@@ -7,6 +7,7 @@ import com.ky.graduation.vo.WeChatLoginVO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * <p>
@@ -34,13 +35,12 @@ public interface IFaceService extends IService<Face> {
 
     /**
      * 人脸上传
-     *
-     * @param img
+     * @param imgList
      * @param personId
      * @return
      * @throws IOException
      */
-    ResultVo faceUpload(MultipartFile img, int personId) throws IOException;
+    ResultVo faceUpload(List<MultipartFile> imgList, int personId) throws IOException;
 
     /**
      * 照片删除
