@@ -42,11 +42,6 @@ public class Device implements Serializable {
     private String deviceKey;
 
     /**
-     * 所属部门id
-     */
-    private Integer laboratoryId;
-
-    /**
      * 所属部门名称
      */
     private String laboratoryName;

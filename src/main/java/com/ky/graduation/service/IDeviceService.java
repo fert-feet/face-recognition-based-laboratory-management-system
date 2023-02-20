@@ -16,6 +16,7 @@ public interface IDeviceService extends IService<Device> {
 
     /**
      * 设备查询分页
+     *
      * @param page
      * @param limit
      * @param labName
@@ -26,6 +27,7 @@ public interface IDeviceService extends IService<Device> {
 
     /**
      * 获取所属实验室名称
+     *
      * @param deviceId
      * @return
      */

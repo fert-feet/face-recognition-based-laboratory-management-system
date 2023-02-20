@@ -71,4 +71,5 @@ public class DeviceController {
     public ResultVo belongLab(int deviceId) {
         return deviceService.getBelongLab(deviceId);
     }
+
 }

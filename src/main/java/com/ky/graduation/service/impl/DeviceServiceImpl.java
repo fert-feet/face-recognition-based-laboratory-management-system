@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ky.graduation.entity.Device;
-import com.ky.graduation.entity.Laboratory;
 import com.ky.graduation.mapper.DeviceMapper;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IDeviceService;
@@ -54,4 +53,5 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         String belongLab = deviceMapper.getBelongLab(deviceId);
         return ResultVo.success().data("labName",belongLab);
     }
+
 }
