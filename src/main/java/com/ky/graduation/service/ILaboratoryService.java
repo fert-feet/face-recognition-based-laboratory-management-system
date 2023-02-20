@@ -65,4 +65,11 @@ public interface ILaboratoryService extends IService<Laboratory> {
      * @return
      */
     ResultVo listLabsName();
+
+    /**
+     * 根据实验室名称查询设备
+     * @param labName
+     * @return
+     */
+    ResultVo deviceList(String labName);
 }

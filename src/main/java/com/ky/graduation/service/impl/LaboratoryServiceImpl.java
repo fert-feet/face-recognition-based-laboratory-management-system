@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ky.graduation.entity.Device;
 import com.ky.graduation.entity.Laboratory;
 import com.ky.graduation.entity.Person;
 import com.ky.graduation.entity.PersonLaboratory;
+import com.ky.graduation.mapper.DeviceMapper;
 import com.ky.graduation.mapper.LaboratoryMapper;
 import com.ky.graduation.mapper.PersonLaboratoryMapper;
 import com.ky.graduation.mapper.PersonMapper;
@@ -41,6 +43,9 @@ public class LaboratoryServiceImpl extends ServiceImpl<LaboratoryMapper, Laborat
 
     @Resource
     private PersonLaboratoryMapper personLaboratoryMapper;
+
+    @Resource
+    private DeviceMapper deviceMapper;
 
     /**
      * 按照id反向排列
@@ -148,5 +153,13 @@ public class LaboratoryServiceImpl extends ServiceImpl<LaboratoryMapper, Laborat
     public ResultVo listLabsName() {
         List<String> labNameList = laboratoryMapper.listLabsName();
         return ResultVo.success().data("labNameList", labNameList);
+    }
+
+    @Override
+    public ResultVo deviceList(String labName) {
+        LambdaQueryWrapper<Device> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(Device::getLaboratoryName, labName);
+        List<Device> deviceList = deviceMapper.selectList(wrapper);
+        return ResultVo.success().data("deviceList", deviceList);
     }
 }

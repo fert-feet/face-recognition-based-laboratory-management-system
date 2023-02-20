@@ -129,4 +129,13 @@ public class LaboratoryController {
         return laboratoryService.listLabsName();
     }
 
+    /**
+     * 根据实验室名称查询设备
+     * @param labName
+     * @return
+     */
+    @PostMapping("/deviceList")
+    public ResultVo deviceList(String labName) {
+        return laboratoryService.deviceList(labName);
+    }
 }
