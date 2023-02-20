@@ -23,4 +23,11 @@ public interface IDeviceService extends IService<Device> {
      * @return
      */
     ResultVo listDevice(long page, long limit, String labName, String sort);
+
+    /**
+     * 获取所属实验室名称
+     * @param deviceId
+     * @return
+     */
+    ResultVo getBelongLab(int deviceId);
 }

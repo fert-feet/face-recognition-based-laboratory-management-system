@@ -63,5 +63,12 @@ public class DeviceController {
         return ResultVo.error();
     }
 
-
+    /**
+     * 获取所属实验室名称
+     * @return
+     */
+    @PostMapping("/belongLab")
+    public ResultVo belongLab(int deviceId) {
+        return deviceService.getBelongLab(deviceId);
+    }
 }

@@ -13,4 +13,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface DeviceMapper extends BaseMapper<Device> {
 
+    /**
+     * 获取所属实验室名称
+     * @param deviceId
+     * @return
+     */
+    String getBelongLab(int deviceId);
 }

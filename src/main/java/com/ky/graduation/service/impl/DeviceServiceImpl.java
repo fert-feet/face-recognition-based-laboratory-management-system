@@ -48,4 +48,10 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         Page<Device> selectPage = deviceMapper.selectPage(labPage, wrapper);
         return ResultVo.success().data("items",selectPage.getRecords()).data("total",selectPage.getTotal());
     }
+
+    @Override
+    public ResultVo getBelongLab(int deviceId) {
+        String belongLab = deviceMapper.getBelongLab(deviceId);
+        return ResultVo.success().data("labName",belongLab);
+    }
 }
