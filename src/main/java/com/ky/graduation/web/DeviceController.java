@@ -44,10 +44,7 @@ public class DeviceController {
      */
     @PostMapping("/createOrUpdate")
     public ResultVo create(@RequestBody Device device) {
-        if (deviceService.saveOrUpdate(device)) {
-            return ResultVo.success();
-        }
-        return ResultVo.error();
+        return deviceService.createOrUpdate(device);
     }
 
     /**

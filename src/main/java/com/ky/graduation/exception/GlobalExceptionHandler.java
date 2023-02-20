@@ -102,7 +102,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = IllegalStateException.class)
     @ResponseBody
-    public ResultVo IllegalStateExceptionHandler(IllegalStateException e) {
+    public ResultVo illegalStateExceptionHandler(IllegalStateException e) {
         //获取错误信息
         log.error("传入参数空缺---{}", e.getMessage());
         return ResultVo.error().status(ResultCode.PARAMS_ERROR);
@@ -157,7 +157,7 @@ public class GlobalExceptionHandler {
     public ResultVo iOExceptionHandler(IOException e) {
         //获取错误信息
         log.error("IO异常---{}", e.getMessage());
-        return ResultVo.error().status(ResultCode.COS_SERVICE_ERROR);
+        return ResultVo.error().status(ResultCode.IO_ERROR);
     }
 
 

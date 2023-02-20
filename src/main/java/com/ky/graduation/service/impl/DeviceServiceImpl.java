@@ -54,4 +54,18 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         return ResultVo.success().data("labName",belongLab);
     }
 
+    @Override
+    public ResultVo createOrUpdate(Device device) {
+        if (device.getId() == null) {
+            deviceMapper.insert(device);
+            return ResultVo.success();
+        }
+        // 取消分配实验室
+        if (device.getLaboratoryName() == null) {
+            device.setLaboratoryName(null);
+        }
+        deviceMapper.updateById(device);
+        return ResultVo.success();
+    }
+
 }

@@ -32,4 +32,11 @@ public interface IDeviceService extends IService<Device> {
      * @return
      */
     ResultVo getBelongLab(int deviceId);
+
+    /**
+     * 更新或新增设备
+     * @param device
+     * @return
+     */
+    ResultVo createOrUpdate(Device device);
 }
