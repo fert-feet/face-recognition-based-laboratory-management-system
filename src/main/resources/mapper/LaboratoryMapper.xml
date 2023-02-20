@@ -17,4 +17,10 @@
                 WHERE
                     lab_id = #{labId})
     </select>
+    <select id="listLabsName" resultType="java.lang.String">
+        SELECT
+            `name`
+        FROM
+            laboratory
+    </select>
 </mapper>

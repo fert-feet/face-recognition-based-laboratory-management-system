@@ -120,4 +120,13 @@ public class LaboratoryController {
         return laboratoryService.createAuthentication(createVo);
     }
 
+    /**
+     * 查询实验室名称
+     * @return
+     */
+    @GetMapping("/listLabsName")
+    public ResultVo listLabsName() {
+        return laboratoryService.listLabsName();
+    }
+
 }

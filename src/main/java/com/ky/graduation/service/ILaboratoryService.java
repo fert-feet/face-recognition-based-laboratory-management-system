@@ -59,4 +59,10 @@ public interface ILaboratoryService extends IService<Laboratory> {
      * @return
      */
     ResultVo findAuthenticatedPersonList(int id);
+
+    /**
+     * 查询实验室名称
+     * @return
+     */
+    ResultVo listLabsName();
 }

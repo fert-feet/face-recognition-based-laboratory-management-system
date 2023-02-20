@@ -23,4 +23,10 @@ public interface LaboratoryMapper extends BaseMapper<Laboratory> {
      * @return
      */
     List<Person> findAuthenticatedPerson(@Param(value = "labId") int id);
+
+    /**
+     * 查询实验室名称
+     * @return
+     */
+    List<String> listLabsName();
 }

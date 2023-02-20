@@ -143,4 +143,10 @@ public class LaboratoryServiceImpl extends ServiceImpl<LaboratoryMapper, Laborat
         log.info(personList.toString());
         return ResultVo.success().data("personList", personList);
     }
+
+    @Override
+    public ResultVo listLabsName() {
+        List<String> labNameList = laboratoryMapper.listLabsName();
+        return ResultVo.success().data("labNameList", labNameList);
+    }
 }

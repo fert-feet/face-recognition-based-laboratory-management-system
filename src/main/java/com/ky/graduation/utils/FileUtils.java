@@ -37,7 +37,6 @@ public class FileUtils {
             multipartFile.transferTo(file);
             imgFileLinkedList.add(file);
         }
-
         return imgFileLinkedList;
     }
 }
