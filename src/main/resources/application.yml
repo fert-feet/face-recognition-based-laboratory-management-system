@@ -16,6 +16,7 @@ tencent:
       cosHost: https://ky2fe-1316858065.cos.ap-chengdu.myqcloud.com
 
 requestUrl:
+  # 基础
   baseUrl: http://192.168.31.155:8090
   # 设备管理
   device:

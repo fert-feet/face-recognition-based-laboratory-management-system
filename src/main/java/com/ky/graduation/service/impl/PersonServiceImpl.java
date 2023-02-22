@@ -18,6 +18,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ky.graduation.vo.AuthenticateLabToPersonVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -45,6 +46,9 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
 
     @Resource
     private PersonLaboratoryMapper personLaboratoryMapper;
+
+    @Value("${requestUrl.person.createPerson}")
+    private String createPersonUrl;
 
     private static final String SORT_REVERSE = "-id";
 

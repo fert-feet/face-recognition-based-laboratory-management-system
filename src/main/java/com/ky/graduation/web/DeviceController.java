@@ -4,7 +4,10 @@ import com.ky.graduation.entity.Device;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IDeviceService;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.regex.Pattern;
 
 /**
  * <p>
@@ -16,7 +19,10 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/device")
+@Slf4j
 public class DeviceController {
+
+    public static final int Origin_IpLeng_th = 16;
 
     @Resource
     private IDeviceService deviceService;
@@ -44,6 +50,11 @@ public class DeviceController {
      */
     @PostMapping("/createOrUpdate")
     public ResultVo create(@RequestBody Device device) {
+        if (device.getIpAdress().length() <= Origin_IpLeng_th) {
+            device.setIpAdress("http://" + device.getIpAdress() + ":8090");
+        }
+        log.info("deviceIpLength---{}", device.getIpAdress().length());
+        log.info("deviceIp---{}", device.getIpAdress());
         return deviceService.createOrUpdate(device);
     }
 

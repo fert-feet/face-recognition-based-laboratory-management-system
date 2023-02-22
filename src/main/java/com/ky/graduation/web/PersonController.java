@@ -91,5 +91,4 @@ public class PersonController {
         return personService.authenticateToPerson(authenticateVo);
     }
 
-
 }
