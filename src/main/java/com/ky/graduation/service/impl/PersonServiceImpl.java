@@ -43,6 +43,9 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
     private LaboratoryMapper laboratoryMapper;
 
     @Resource
+    private FaceMapper faceMapper;
+
+    @Resource
     private DeviceMapper deviceMapper;
 
     @Resource
@@ -53,6 +56,12 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
 
     @Value("${requestUrl.person.deletePerson}")
     private String deletePersonUrl;
+
+    @Value("${requestUrl.face.clearFace}")
+    private String clearFaceUrl;
+
+    @Value("${requestUrl.face.createFace}")
+    private String createFaceUrl;
 
     @Value("${requestUrl.person.updatePerson}")
     private String updatePersonUrl;
@@ -98,16 +107,22 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
         LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
         // 循环向各个人脸机发送删除请求
         deviceList.forEach(device -> {
+            // 清空人脸
             multiValueMap.set("pass", device.getPassword());
+            multiValueMap.set("personId", authenticateVO.getPersonId().toString());
+            RequestResult clearFaceResult = sendRequest.sendPostRequest(device.getIpAdress(), clearFaceUrl, multiValueMap);
+            log.info("clearFaceResult---{}", clearFaceResult.getMsg());
+            // 人员删除
             multiValueMap.set("id", authenticateVO.getPersonId().toString());
-            RequestResult result = sendRequest.sendPostRequest(device.getIpAdress(), deletePersonUrl, multiValueMap);
-            log.info("requestResult---{}", result.getMsg());
+            RequestResult deletePersonResult = sendRequest.sendPostRequest(device.getIpAdress(), deletePersonUrl, multiValueMap);
+            log.info("deletePersonResult---{}", deletePersonResult.getMsg());
         });
         // 将对应人员分配的实验室都删除
         LambdaQueryWrapper<PersonLaboratory> wrapper = Wrappers.lambdaQuery();
         wrapper.eq(PersonLaboratory::getPId,authenticateVO.getPersonId());
         personLaboratoryMapper.delete(wrapper);
         Person person = new Person();
+
         // 传入的实验室id列表为空时，只更改人员分配状态
         if (authenticateVO.getLabIdList().size() == 0){
             person.setId(authenticateVO.getPersonId());
@@ -124,21 +139,36 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
             // 查询该人员信息
             Person selectPerson = personMapper.selectById(authenticateVO.getPersonId());
             JSONObject personJson = new JSONObject();
+            // 查询人员照片
+            LambdaQueryWrapper<Face> faceWrapper = Wrappers.lambdaQuery();
+            faceWrapper.eq(Face::getPersonId, authenticateVO.getPersonId());
+            List<Face> faceList = faceMapper.selectList(faceWrapper);
             // 循环对人脸机发起请求，该双重循环不可避免
             devices.forEach(device -> {
+                // 人员添加
                 personJson.set("id", authenticateVO.getPersonId().toString());
                 personJson.set("name", selectPerson.getName());
                 personJson.set("iDNumber",selectPerson.getIdNumber());
+                personJson.set("password","123456");
                 multiValueMap.set("pass", device.getPassword());
                 multiValueMap.set("person", personJson);
-                RequestResult result = sendRequest.sendPostRequest(device.getIpAdress(), createPersonUrl, multiValueMap);
-                log.info("requestResult---{}", result.getMsg());
+                RequestResult createPersonResult = sendRequest.sendPostRequest(device.getIpAdress(), createPersonUrl, multiValueMap);
+                log.info("createPersonResult---{}", createPersonResult.getMsg());
+                // 遍历人脸照片列表，添加到每个人脸机，双重循环不可避免
+                faceList.forEach(face -> {
+                    multiValueMap.set("personId", authenticateVO.getPersonId().toString());
+                    multiValueMap.set("faceId", face.getFaceId().toString());
+                    multiValueMap.set("url", face.getUrl());
+                    sendRequest.sendPostRequest(device.getIpAdress(), createFaceUrl, multiValueMap);
+                });
             });
             // 每个循环都需要创建对象
             PersonLaboratory personLaboratory = new PersonLaboratory();
+            // 添加人员与实验室授权关系
             personLaboratory.setPId(authenticateVO.getPersonId());
             personLaboratory.setLabId(labId);
             personLaboratoryMapper.insert(personLaboratory);
+            // 添加人员授权状态
             person.setId(authenticateVO.getPersonId());
             person.setIsDistributed((byte) 1);
             personMapper.updateById(person);

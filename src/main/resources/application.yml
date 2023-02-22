@@ -36,3 +36,5 @@ requestUrl:
     createFace: /face
     # 人脸删除
     deleteFace: /face/delete
+    # 人员人脸清空
+    clearFace: /face/deletePerson
