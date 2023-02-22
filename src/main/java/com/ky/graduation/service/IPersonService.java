@@ -41,4 +41,10 @@ public interface IPersonService extends IService<Person> {
      */
     ResultVo authenticateToPerson(AuthenticateLabToPersonVO authenticateVO);
 
+    /**
+     * 新增或更新人员
+     * @param person
+     * @return
+     */
+    ResultVo createOrUpdate(Person person);
 }

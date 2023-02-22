@@ -47,14 +47,7 @@ public class PersonController {
      */
     @PostMapping("/createOrUpdate")
     public ResultVo create(@RequestBody Person person) {
-        // 若为新注册人员，则设置默认密码
-        if (StringUtils.isEmpty(person.getPassword())){
-            person.setPassword(person.getIdNumber());
-        }
-        if (personService.saveOrUpdate(person)){
-            return ResultVo.success();
-        }
-        return ResultVo.error();
+        return personService.createOrUpdate(person);
     }
 
     /**

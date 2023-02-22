@@ -54,6 +54,9 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
     @Value("${requestUrl.person.deletePerson}")
     private String deletePersonUrl;
 
+    @Value("${requestUrl.person.updatePerson}")
+    private String updatePersonUrl;
+
     private static final String SORT_REVERSE = "-id";
 
     private static final String AUTHENTICATED_SQL = "SELECT lab_id FROM person_laboratory WHERE p_id=";
@@ -122,7 +125,7 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
             Person selectPerson = personMapper.selectById(authenticateVO.getPersonId());
             JSONObject personJson = new JSONObject();
             // 循环对人脸机发起请求，该双重循环不可避免
-            for (Device device:devices){
+            devices.forEach(device -> {
                 personJson.set("id", authenticateVO.getPersonId().toString());
                 personJson.set("name", selectPerson.getName());
                 personJson.set("iDNumber",selectPerson.getIdNumber());
@@ -130,7 +133,7 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
                 multiValueMap.set("person", personJson);
                 RequestResult result = sendRequest.sendPostRequest(device.getIpAdress(), createPersonUrl, multiValueMap);
                 log.info("requestResult---{}", result.getMsg());
-            }
+            });
             // 每个循环都需要创建对象
             PersonLaboratory personLaboratory = new PersonLaboratory();
             personLaboratory.setPId(authenticateVO.getPersonId());
@@ -140,6 +143,39 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
             person.setIsDistributed((byte) 1);
             personMapper.updateById(person);
         });
+        return ResultVo.success();
+    }
+
+    @Override
+    public ResultVo createOrUpdate(Person person) {
+        // id为空则为新增，直接操作数据库
+        if (person.getId() == null) {
+            personMapper.insert(person);
+            return ResultVo.success();
+        }
+        // 若已经写入人脸机中，则需要请求人脸机进行修改
+        if (person.getIsDistributed() == 1){
+            // 查找人员所在的各设备
+            List<Device> deviceList = personMapper.findDeviceListContainPerson(person.getId());
+            LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
+            // 循环请求请求人脸机进行更新
+            deviceList.forEach(device -> {
+                JSONObject personJson = new JSONObject();
+                personJson.set("id", person.getId().toString());
+                personJson.set("name", person.getName());
+                // 暂时写死，只允许6位，后续改写
+                personJson.set("password", "132456");
+                personJson.set("iDNumber", person.getIdNumber());
+                multiValueMap.set("person", personJson);
+                multiValueMap.set("pass", device.getPassword());
+                // 发起请求
+                RequestResult requestResult = sendRequest.sendPostRequest(device.getIpAdress(), updatePersonUrl, multiValueMap);
+                log.info("requestResult---{}", requestResult.getMsg());
+            });
+        }
+        // 设置默认密码
+        person.setPassword(person.getIdNumber());
+        personMapper.updateById(person);
         return ResultVo.success();
     }
 
