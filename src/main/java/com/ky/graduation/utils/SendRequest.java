@@ -1,6 +1,9 @@
 package com.ky.graduation.utils;
 
+import cn.hutool.http.HttpException;
 import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import com.ky.graduation.device.RequestResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -21,6 +24,8 @@ public class SendRequest {
     @Value("${requestUrl.baseUrl}")
     String baseUrl;
 
+    public static final String SUCCESS_CODE = "LAN_SUS-0";
+
     /**
      * 发送get请求（有参数）
      *
@@ -28,7 +33,7 @@ public class SendRequest {
      * @param params
      * @return JSONObject
      */
-    public JSONObject sendGetRequest(String url,MultiValueMap<String,Object> params) {
+    public RequestResult sendGetRequest(String ip, String url, MultiValueMap<String, Object> params) {
         RestTemplate client = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         HttpMethod method = HttpMethod.POST;
@@ -37,11 +42,15 @@ public class SendRequest {
         //将请求头部和参数合成一个请求
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(params, headers);
         // Url拼接
-        String requestUrl = baseUrl + url;
+        String requestUrl = "http://" + ip + ":8090" + url;
         log.info("requestUrl---{}",requestUrl);
         //执行HTTP请求，将返回的结构使用ResultVO类格式化
         ResponseEntity<JSONObject> response = client.exchange(requestUrl, method, requestEntity, JSONObject.class);
-        return response.getBody();
+        RequestResult requestResult = JSONUtil.toBean(response.getBody(), RequestResult.class);
+        if (requestResult != null && !requestResult.getCode().equals(SUCCESS_CODE)){
+            throw new HttpException(requestResult.getMsg());
+        }
+        return requestResult;
     }
 
     /**
@@ -50,7 +59,7 @@ public class SendRequest {
      * @param url
      * @return JSONObject
      */
-    public JSONObject sendGetRequest(String url) {
+    public RequestResult sendGetRequest(String ip, String url) {
         RestTemplate client = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         HttpMethod method = HttpMethod.GET;
@@ -58,11 +67,15 @@ public class SendRequest {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         //将请求头部和参数合成一个请求
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
-        String requestUrl = baseUrl + url;
+        String requestUrl = "http://" + ip + ":8090" + url;
         log.info("requestUrl---{}",requestUrl);
         //执行HTTP请求，将返回的结构使用ResultVO类格式化
         ResponseEntity<JSONObject> response = client.exchange(requestUrl, method, requestEntity, JSONObject.class);
-        return response.getBody();
+        RequestResult requestResult = JSONUtil.toBean(response.getBody(), RequestResult.class);
+        if (requestResult != null && !requestResult.getCode().equals(SUCCESS_CODE)){
+            throw new HttpException(requestResult.getMsg());
+        }
+        return requestResult;
     }
 
     /**
@@ -72,7 +85,7 @@ public class SendRequest {
      * @param params
      * @return JSONObject
      */
-    public JSONObject sendPostRequest(String url, MultiValueMap<String, Object> params) {
+    public RequestResult sendPostRequest(String ip, String url, MultiValueMap<String, Object> params) {
         RestTemplate client = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         HttpMethod method = HttpMethod.POST;
@@ -80,11 +93,15 @@ public class SendRequest {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         //将请求头部和参数合成一个请求
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(params, headers);
-        String requestUrl = baseUrl + url;
+        String requestUrl = "http://" + ip + ":8090" + url;
         log.info("requestUrl---{}",requestUrl);
         //执行HTTP请求，将返回的结构使用ResultVO类格式化
         ResponseEntity<JSONObject> response = client.exchange(requestUrl, method, requestEntity, JSONObject.class);
-        return response.getBody();
+        RequestResult requestResult = JSONUtil.toBean(response.getBody(), RequestResult.class);
+        if (requestResult != null && !requestResult.getCode().equals(SUCCESS_CODE)){
+            throw new HttpException(requestResult.getMsg());
+        }
+        return requestResult;
     }
 
 }

@@ -48,4 +48,10 @@ public class Device implements Serializable {
      */
     @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String laboratoryName;
+
+    /**
+     * 所属部门id
+     */
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private Integer laboratoryId;
 }

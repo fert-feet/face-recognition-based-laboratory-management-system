@@ -2,4 +2,18 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ky.graduation.mapper.PersonMapper">
 
+    <select id="findDeviceListContainPerson" resultType="com.ky.graduation.entity.Device">
+        SELECT
+            *
+        FROM
+            device
+        WHERE
+                laboratory_name IN (
+                SELECT
+                    laboratory_name
+                FROM
+                    laboratory
+                WHERE
+                    laboratory.id IN ( SELECT lab_id FROM person_laboratory WHERE p_id = #{personId} ))
+    </select>
 </mapper>

@@ -5,11 +5,14 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ky.graduation.entity.Device;
+import com.ky.graduation.entity.Laboratory;
 import com.ky.graduation.mapper.DeviceMapper;
+import com.ky.graduation.mapper.LaboratoryMapper;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IDeviceService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,10 +24,14 @@ import org.springframework.stereotype.Service;
  * @since 2023-02-01
  */
 @Service
+@Slf4j
 public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> implements IDeviceService {
 
     @Resource
     private DeviceMapper deviceMapper;
+
+    @Resource
+    private LaboratoryMapper laboratoryMapper;
 
     private static final String SORT_REVERSE = "-id";
 
@@ -63,7 +70,16 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         // 取消分配实验室
         if (device.getLaboratoryName() == null) {
             device.setLaboratoryName(null);
+            device.setLaboratoryId(null);
+            deviceMapper.updateById(device);
+            return ResultVo.success();
         }
+        log.info(device.getLaboratoryName());
+        // 若传入实验室名称，则同时更新实验室id
+        LambdaQueryWrapper<Laboratory> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(Laboratory::getName, device.getLaboratoryName());
+        Laboratory laboratory = laboratoryMapper.selectOne(wrapper);
+        device.setLaboratoryId(laboratory.getId());
         deviceMapper.updateById(device);
         return ResultVo.success();
     }

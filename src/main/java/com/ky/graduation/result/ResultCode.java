@@ -42,6 +42,8 @@ public enum ResultCode implements StatusCode {
 
     IO_ERROR(1013,"IO异常"),
 
+    DEVICE_REQUEST_ERROR(2000, "人脸机请求失败"),
+
     ;
 
     /**
