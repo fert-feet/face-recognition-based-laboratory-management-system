@@ -14,3 +14,24 @@ tencent:
       bucketName: ky2fe-1316858065
       regionName: ap-chengdu
       cosHost: https://ky2fe-1316858065.cos.ap-chengdu.myqcloud.com
+
+requestUrl:
+  baseUrl: http://192.168.31.155:8090
+  # 设备管理
+  device:
+    getDeviceKey: /getDeviceKey
+  # 人员管理
+  person:
+    # 人员注册
+    createPerson: /person/create
+    # 人员更新
+    updatePerson: /person/update
+    # 人员删除
+    deletePerson: /person/delete
+    # 设置人员进入许可时间
+    personPassTime: /person/createPasstime
+  face:
+    # 人员人脸注册
+    createFace: /face
+    # 人脸删除
+    deleteFace: /face/delete
