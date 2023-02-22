@@ -57,9 +57,6 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
     @Value("${requestUrl.person.deletePerson}")
     private String deletePersonUrl;
 
-    @Value("${requestUrl.face.clearFace}")
-    private String clearFaceUrl;
-
     @Value("${requestUrl.face.createFace}")
     private String createFaceUrl;
 
@@ -107,12 +104,8 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
         LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
         // 循环向各个人脸机发送删除请求
         deviceList.forEach(device -> {
-            // 清空人脸
+            // 人员删除，同时清空人员人脸
             multiValueMap.set("pass", device.getPassword());
-            multiValueMap.set("personId", authenticateVO.getPersonId().toString());
-            RequestResult clearFaceResult = sendRequest.sendPostRequest(device.getIpAdress(), clearFaceUrl, multiValueMap);
-            log.info("clearFaceResult---{}", clearFaceResult.getMsg());
-            // 人员删除
             multiValueMap.set("id", authenticateVO.getPersonId().toString());
             RequestResult deletePersonResult = sendRequest.sendPostRequest(device.getIpAdress(), deletePersonUrl, multiValueMap);
             log.info("deletePersonResult---{}", deletePersonResult.getMsg());

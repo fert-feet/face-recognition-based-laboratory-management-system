@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ky.graduation.entity.Person;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -22,7 +23,7 @@ public interface LaboratoryMapper extends BaseMapper<Laboratory> {
      * @param id
      * @return
      */
-    List<Person> findAuthenticatedPerson(@Param(value = "labId") int id);
+    LinkedList<Person> findAuthenticatedPerson(@Param(value = "labId") int id);
 
     /**
      * 查询实验室名称
