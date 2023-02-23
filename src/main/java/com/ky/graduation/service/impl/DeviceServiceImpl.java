@@ -51,6 +51,10 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
     @Value("${requestUrl.person.createPerson}")
     private String createPersonUrl;
 
+    @Value("${requestUrl.device.setPassWord}")
+    private String setPassWordUrl;
+
+
     private static final String SORT_REVERSE = "-id";
 
     @Override
@@ -81,10 +85,21 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
 
     @Override
     public ResultVo createOrUpdate(Device device) {
+        log.info("labName---{}", device.getLaboratoryName());
         // 为新增则直接操作数据库
         if (device.getId() == null) {
             deviceMapper.insert(device);
             return ResultVo.success();
+        }
+        // 此情况为防止传入实验室信息为NULL且为编辑的情况
+        if (device.getLaboratoryName() == null) {
+            return updateDeviceInfo(device);
+        }
+        // 若传入实验室与设备绑定实验室相同，则为编辑设备信息操作
+        LambdaQueryWrapper<Device> deviceWrapper = Wrappers.lambdaQuery();
+        deviceWrapper.eq(Device::getLaboratoryName, device.getLaboratoryName()).eq(Device::getId, device.getId());
+        if(deviceMapper.exists(deviceWrapper)){
+            return updateDeviceInfo(device);
         }
         LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
         // 若为更新所属实验室状态（包括取消和更改），则首先清空该设备人员以及照片信息
@@ -93,7 +108,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         RequestResult deletePersonRequest = sendRequest.sendPostRequest(device.getIpAdress(), deletePersonUrl, multiValueMap);
         log.info("deletePersonRequest---{}", deletePersonRequest.getMsg());
         // 取消分配实验室
-        if (device.getLaboratoryName() == null) {
+        if (device.getLaboratoryName().equals("")) {
             // 将实验室相关字段都置空
             device.setLaboratoryName(null);
             device.setLaboratoryId(null);
@@ -119,6 +134,23 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
             RequestResult createPersonRequest = sendRequest.sendPostRequest(device.getIpAdress(), createPersonUrl, multiValueMap);
             log.info("createPersonRequest---{}", createPersonRequest.getMsg());
         });
+        return ResultVo.success();
+    }
+
+    private ResultVo updateDeviceInfo(Device device) {
+        // 若更改密码，则需请求设备进行更改
+        Device selectDevice = deviceMapper.selectById(device.getId());
+        if (!selectDevice.getPassword().equals(device.getPassword())){
+            LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
+            // 旧密码
+            multiValueMap.set("oldPass", selectDevice.getPassword());
+            // 新密码
+            multiValueMap.set("newPass", device.getPassword());
+            RequestResult setPassWordRequest = sendRequest.sendPostRequest(device.getIpAdress(), setPassWordUrl, multiValueMap);
+            log.info("setPassWordRequest---{}", setPassWordRequest.getMsg());
+        }
+        // 直接更新信息即可
+        deviceMapper.updateById(device);
         return ResultVo.success();
     }
 

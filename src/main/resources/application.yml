@@ -21,6 +21,7 @@ requestUrl:
   # 设备管理
   device:
     getDeviceKey: /getDeviceKey
+    setPassWord: /setPassWord
   # 人员管理
   person:
     # 人员注册
