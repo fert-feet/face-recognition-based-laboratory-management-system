@@ -57,11 +57,7 @@ public class PersonController {
      */
     @PostMapping("/delete")
     public ResultVo delete(int id) {
-        // 级联删除
-        if (personService.removeById(id)) {
-            return ResultVo.success();
-        }
-        return ResultVo.error();
+        return personService.deletePerson(id);
     }
 
     /**

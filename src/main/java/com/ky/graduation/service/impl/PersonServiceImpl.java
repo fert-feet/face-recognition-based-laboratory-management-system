@@ -11,6 +11,7 @@ import com.ky.graduation.mapper.*;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IPersonService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ky.graduation.utils.CosRequest;
 import com.ky.graduation.utils.SendRequest;
 import com.ky.graduation.vo.AuthenticateLabToPersonVO;
 import jakarta.annotation.Resource;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -47,6 +49,9 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
 
     @Resource
     private DeviceMapper deviceMapper;
+
+    @Resource
+    private CosRequest cosRequest;
 
     @Resource
     private PersonLaboratoryMapper personLaboratoryMapper;
@@ -200,6 +205,37 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
         person.setPassword(person.getIdNumber());
         personMapper.updateById(person);
         return ResultVo.success();
+    }
+
+    @Override
+    public ResultVo deletePerson(int id) {
+        // 查询人员是否存在于设备中
+        LinkedList<Device> deviceList = personMapper.findDeviceListContainPerson(id);
+        //若存在，则删除设备中此人员以及照片
+        if (deviceList.size() > 0){
+            deviceList.forEach(device -> {
+                LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
+                multiValueMap.set("pass", device.getPassword());
+                multiValueMap.set("id", id);
+                RequestResult deletePersonRequest = sendRequest.sendPostRequest(device.getIpAdress(), deletePersonUrl, multiValueMap);
+                log.info("deletePersonRequest---{}", deletePersonRequest.getMsg());
+            });
+        }
+        // 若不存在设备中，则在云端删除照片
+        LambdaQueryWrapper<Face> faceWrapper = Wrappers.lambdaQuery();
+        faceWrapper.eq(Face::getPersonId, id);
+        List<Face> faceList = faceMapper.selectList(faceWrapper);
+        // 若有人脸信息，循环向云端发起删除请求
+        if (faceList.size() > 0){
+            faceList.forEach(face -> {
+                cosRequest.deleteObject(face.getName());
+            });
+        }
+        // 操作数据库，级联删除，实验室授权关系与人员照片
+        if (personMapper.deleteById(id) > 0){
+            return ResultVo.success();
+        }
+        return ResultVo.error();
     }
 
 }

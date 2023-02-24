@@ -47,4 +47,11 @@ public interface IPersonService extends IService<Person> {
      * @return
      */
     ResultVo createOrUpdate(Person person);
+
+    /**
+     * 人员删除
+     * @param id
+     * @return
+     */
+    ResultVo deletePerson(int id);
 }
