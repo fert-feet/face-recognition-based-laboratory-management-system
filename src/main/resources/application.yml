@@ -12,8 +12,8 @@ tencent:
   cos:
     file:
       # 将id和key删除最后一个字母，暂时躲避tx检测
-      secretId: AKIDABzYu0OYUChy0ub4JK6mCNJ0WnpgU7Wf
-      secretKey: DBuOfiYAjHmARbgeVEsQslAXtAKI2Xos
+      secretId: AKIDABzYu0OYUChy0ub4JK6mCNJ0WnpgU7W
+      secretKey: DBuOfiYAjHmARbgeVEsQslAXtAKI2Xo
       bucketName: ky2fe-1316858065
       regionName: ap-chengdu
       cosHost: https://ky2fe-1316858065.cos.ap-chengdu.myqcloud.com

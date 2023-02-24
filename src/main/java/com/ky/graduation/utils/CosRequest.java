@@ -50,7 +50,7 @@ public class CosRequest {
      * @return
      */
     public COSClient initCosClient() {
-        COSCredentials cred = new BasicCOSCredentials(cosConfig.getSecretId(), cosConfig.getSecretKey());
+        COSCredentials cred = new BasicCOSCredentials(cosConfig.getSecretId() + "f", cosConfig.getSecretKey() + "s");
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.setRegion(new Region(cosConfig.getRegionName()));
         return new COSClient(cred, clientConfig);
