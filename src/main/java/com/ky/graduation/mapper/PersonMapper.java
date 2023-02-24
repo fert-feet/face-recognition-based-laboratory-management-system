@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ky.graduation.entity.Device;
 import com.ky.graduation.entity.Person;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -21,5 +22,5 @@ public interface PersonMapper extends BaseMapper<Person> {
      * @param personId
      * @return
      */
-    List<Device> findDeviceListContainPerson(Integer personId);
+    LinkedList<Device> findDeviceListContainPerson(Integer personId);
 }

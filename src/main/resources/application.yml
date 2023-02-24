@@ -4,13 +4,16 @@ spring:
     username: root
     password: lwz7254591
     url: jdbc:mysql://localhost:3306/ky_graduate?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
-
+  servlet:
+    multipart:
+      # 设置最大文件上传限制
+      max-file-size: 10MB
 tencent:
   cos:
     file:
       # 将id和key删除最后一个字母，暂时躲避tx检测
-      secretId: AKIDFLUWHm10jCOK0PWZN8kEh3KPHtGMF8t
-      secretKey: OYVDrLceR0KOTaXEiyzkGj4D8FHE0oQ
+      secretId: AKIDABzYu0OYUChy0ub4JK6mCNJ0WnpgU7Wf
+      secretKey: DBuOfiYAjHmARbgeVEsQslAXtAKI2Xos
       bucketName: ky2fe-1316858065
       regionName: ap-chengdu
       cosHost: https://ky2fe-1316858065.cos.ap-chengdu.myqcloud.com
