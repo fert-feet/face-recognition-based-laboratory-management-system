@@ -7,9 +7,11 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ky.graduation.device.RequestResult;
 import com.ky.graduation.entity.Device;
+import com.ky.graduation.entity.Face;
 import com.ky.graduation.entity.Laboratory;
 import com.ky.graduation.entity.Person;
 import com.ky.graduation.mapper.DeviceMapper;
+import com.ky.graduation.mapper.FaceMapper;
 import com.ky.graduation.mapper.LaboratoryMapper;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IDeviceService;
@@ -40,6 +42,9 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
     private DeviceMapper deviceMapper;
 
     @Resource
+    private FaceMapper faceMapper;
+
+    @Resource
     private LaboratoryMapper laboratoryMapper;
 
     @Resource
@@ -53,6 +58,10 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
 
     @Value("${requestUrl.device.setPassWord}")
     private String setPassWordUrl;
+
+    @Value("${requestUrl.face.createFace}")
+    private String createFaceUrl;
+
 
 
     private static final String SORT_REVERSE = "-id";
@@ -133,6 +142,18 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
             multiValueMap.set("person", personJson);
             RequestResult createPersonRequest = sendRequest.sendPostRequest(device.getIpAdress(), createPersonUrl, multiValueMap);
             log.info("createPersonRequest---{}", createPersonRequest.getMsg());
+            // 将人员照片也传入
+            LambdaQueryWrapper<Face> faceWrapper = Wrappers.lambdaQuery();
+            faceWrapper.eq(Face::getPersonId, person.getId());
+            List<Face> faceList = faceMapper.selectList(faceWrapper);
+            // 循环传入每个人的人脸照片
+            faceList.forEach(face -> {
+                multiValueMap.set("pass", device.getPassword());
+                multiValueMap.set("personId", person.getId());
+                multiValueMap.set("faceId", face.getFaceId());
+                multiValueMap.set("url", face.getUrl());
+                sendRequest.sendPostRequest(device.getIpAdress(), createFaceUrl, multiValueMap);
+            });
         });
         return ResultVo.success();
     }
