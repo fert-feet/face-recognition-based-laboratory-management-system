@@ -1,12 +1,12 @@
 package com.ky.graduation.service;
 
-import com.ky.graduation.entity.Device;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ky.graduation.entity.Device;
 import com.ky.graduation.result.ResultVo;
 
 /**
  * <p>
- *  服务类
+ * 服务类
  * </p>
  *
  * @author Ky2Fe
@@ -35,6 +35,7 @@ public interface IDeviceService extends IService<Device> {
 
     /**
      * 更新或新增设备
+     *
      * @param device
      * @return
      */
@@ -42,6 +43,7 @@ public interface IDeviceService extends IService<Device> {
 
     /**
      * 设备删除
+     *
      * @param id
      * @return
      */

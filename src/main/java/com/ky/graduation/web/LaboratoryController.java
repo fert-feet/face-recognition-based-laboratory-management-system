@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author Ky2Fe
@@ -24,8 +24,10 @@ public class LaboratoryController {
 
     @Resource
     private ILaboratoryService laboratoryService;
+
     /**
      * 实验室查询分页
+     *
      * @param page
      * @param limit
      * @param name
@@ -38,21 +40,23 @@ public class LaboratoryController {
             long limit,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String sort) {
-        return laboratoryService.listLab(page, limit, name,sort);
+        return laboratoryService.listLab(page, limit, name, sort);
     }
 
     /**
      * 实验室不分页查询
+     *
      * @return
      */
     @GetMapping("/list")
     public ResultVo list() {
         List<Laboratory> labList = laboratoryService.list();
-        return ResultVo.success().data("labList",labList);
+        return ResultVo.success().data("labList", labList);
     }
 
     /**
      * 更新或新增实验室
+     *
      * @param laboratory
      * @return
      */
@@ -66,6 +70,7 @@ public class LaboratoryController {
 
     /**
      * 实验室删除功能
+     *
      * @return
      */
     @PostMapping("/delete")
@@ -78,6 +83,7 @@ public class LaboratoryController {
 
     /**
      * 查询实验室已授权的人
+     *
      * @param id
      * @return
      */
@@ -87,11 +93,12 @@ public class LaboratoryController {
                                         long limit,
                                         @RequestParam(required = false) String name,
                                         @RequestParam(required = false) String sort) {
-        return laboratoryService.findAuthenticatedPerson(id,page,limit,name,sort);
+        return laboratoryService.findAuthenticatedPerson(id, page, limit, name, sort);
     }
 
     /**
      * 查询实验室已授权人员不分页
+     *
      * @param id
      * @return
      */
@@ -102,6 +109,7 @@ public class LaboratoryController {
 
     /**
      * 取消本实验室对某人的授权
+     *
      * @param personLaboratory
      * @return
      */
@@ -112,6 +120,7 @@ public class LaboratoryController {
 
     /**
      * 新增本实验室对某人的授权
+     *
      * @param createVo
      * @return
      */
@@ -122,6 +131,7 @@ public class LaboratoryController {
 
     /**
      * 查询实验室名称
+     *
      * @return
      */
     @GetMapping("/listLabsName")
@@ -131,6 +141,7 @@ public class LaboratoryController {
 
     /**
      * 根据实验室名称查询设备
+     *
      * @param labName
      * @return
      */

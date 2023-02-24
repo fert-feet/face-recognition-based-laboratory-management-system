@@ -3,7 +3,10 @@ package com.ky.graduation.web;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IFaceService;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -11,7 +14,7 @@ import java.util.List;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author Ky2Fe
@@ -26,6 +29,7 @@ public class FaceController {
 
     /**
      * 查询人员人脸数据
+     *
      * @param personId
      * @return
      */
@@ -36,6 +40,7 @@ public class FaceController {
 
     /**
      * 人脸上传
+     *
      * @param imgList
      * @param personId
      * @return
@@ -48,12 +53,13 @@ public class FaceController {
 
     /**
      * 照片删除
+     *
      * @param faceId
      * @param personId
      * @return
      */
     @PostMapping("/delete")
-    public ResultVo delete(int faceId,int personId) {
-        return faceService.deleteFace(faceId,personId);
+    public ResultVo delete(int faceId, int personId) {
+        return faceService.deleteFace(faceId, personId);
     }
 }

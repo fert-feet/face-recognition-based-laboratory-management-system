@@ -1,14 +1,14 @@
 package com.ky.graduation.service;
 
-import com.ky.graduation.entity.Laboratory;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ky.graduation.entity.Laboratory;
 import com.ky.graduation.entity.PersonLaboratory;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.vo.CreatePersonAuthenticationVO;
 
 /**
  * <p>
- *  服务类
+ * 服务类
  * </p>
  *
  * @author Ky2Fe
@@ -41,6 +41,7 @@ public interface ILaboratoryService extends IService<Laboratory> {
 
     /**
      * 取消实验室对某人的授权
+     *
      * @param personLaboratory
      * @return
      */
@@ -48,6 +49,7 @@ public interface ILaboratoryService extends IService<Laboratory> {
 
     /**
      * 新增实验室对某人的授权
+     *
      * @param createVo
      * @return
      */
@@ -55,6 +57,7 @@ public interface ILaboratoryService extends IService<Laboratory> {
 
     /**
      * 查询实验室已授权人员不分页
+     *
      * @param id
      * @return
      */
@@ -62,12 +65,14 @@ public interface ILaboratoryService extends IService<Laboratory> {
 
     /**
      * 查询实验室名称
+     *
      * @return
      */
     ResultVo listLabsName();
 
     /**
      * 根据实验室名称查询设备
+     *
      * @param labName
      * @return
      */

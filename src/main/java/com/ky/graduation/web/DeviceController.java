@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author Ky2Fe
@@ -23,8 +23,10 @@ public class DeviceController {
 
     @Resource
     private IDeviceService deviceService;
+
     /**
      * 设备查询分页
+     *
      * @param page
      * @param limit
      * @param labName
@@ -37,11 +39,12 @@ public class DeviceController {
             long limit,
             @RequestParam(required = false) String labName,
             @RequestParam(required = false) String sort) {
-        return deviceService.listDevice(page, limit, labName,sort);
+        return deviceService.listDevice(page, limit, labName, sort);
     }
 
     /**
      * 更新或新增设备
+     *
      * @param device
      * @return
      */
@@ -52,6 +55,7 @@ public class DeviceController {
 
     /**
      * 设备删除
+     *
      * @param id
      * @return
      */
@@ -62,6 +66,7 @@ public class DeviceController {
 
     /**
      * 获取所属实验室名称
+     *
      * @return
      */
     @PostMapping("/belongLab")

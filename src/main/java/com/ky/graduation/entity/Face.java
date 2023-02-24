@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author Ky2Fe
@@ -35,10 +35,10 @@ public class Face implements Serializable {
     /**
      * 人脸照片base64编码
      */
-    private String  imgEncode;
+    private String imgEncode;
 
     /**
-     * 是否不严格检测照片质量	false（默认）：严格	true：不严格	
+     * 是否不严格检测照片质量	false（默认）：严格	true：不严格
      */
     private Byte isEasyWay;
 

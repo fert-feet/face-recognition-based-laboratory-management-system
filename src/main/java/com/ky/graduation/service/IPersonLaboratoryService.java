@@ -1,11 +1,11 @@
 package com.ky.graduation.service;
 
-import com.ky.graduation.entity.PersonLaboratory;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ky.graduation.entity.PersonLaboratory;
 
 /**
  * <p>
- *  服务类
+ * 服务类
  * </p>
  *
  * @author Ky2Fe

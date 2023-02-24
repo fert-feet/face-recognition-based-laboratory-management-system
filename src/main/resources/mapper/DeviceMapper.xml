@@ -2,11 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ky.graduation.mapper.DeviceMapper">
     <select id="getBelongLab" resultType="java.lang.String">
-        SELECT
-            laboratory_name
-        FROM
-            device
-        WHERE
-            id = #{deviceId}
+        SELECT laboratory_name
+        FROM device
+        WHERE id = #{deviceId}
     </select>
 </mapper>

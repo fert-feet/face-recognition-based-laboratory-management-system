@@ -1,11 +1,11 @@
 package com.ky.graduation.mapper;
 
-import com.ky.graduation.entity.PersonLaboratory;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.ky.graduation.entity.PersonLaboratory;
 
 /**
  * <p>
- *  Mapper 接口
+ * Mapper 接口
  * </p>
  *
  * @author Ky2Fe

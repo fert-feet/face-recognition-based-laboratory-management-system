@@ -4,23 +4,14 @@
 
 
     <select id="findAuthenticatedPerson" resultType="com.ky.graduation.entity.Person">
-        SELECT
-            *
-        FROM
-            person
-        WHERE
-                id IN (
-                SELECT
-                    p_id
-                FROM
-                    person_laboratory
-                WHERE
-                    lab_id = #{labId})
+        SELECT *
+        FROM person
+        WHERE id IN (SELECT p_id
+                     FROM person_laboratory
+                     WHERE lab_id = #{labId})
     </select>
     <select id="listLabsName" resultType="java.lang.String">
-        SELECT
-            `name`
-        FROM
-            laboratory
+        SELECT `name`
+        FROM laboratory
     </select>
 </mapper>

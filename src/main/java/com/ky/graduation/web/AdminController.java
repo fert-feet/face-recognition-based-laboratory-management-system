@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author Ky2Fe
@@ -39,6 +39,7 @@ public class AdminController {
 
     /**
      * 登出
+     *
      * @return
      */
     @PostMapping("/logout")

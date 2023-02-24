@@ -1,7 +1,6 @@
 package com.ky.graduation.wx;
 
 import com.ky.graduation.entity.Face;
-import com.ky.graduation.result.ResultCode;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IFaceService;
 import com.ky.graduation.vo.WeChatLoginVO;
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author Ky2Fe
@@ -28,6 +27,7 @@ public class WeChatFaceController {
 
     /**
      * 微信小程序登录
+     *
      * @param weChatLoginVO
      * @return
      */
@@ -38,12 +38,13 @@ public class WeChatFaceController {
 
     /**
      * 人脸录入接口
+     *
      * @param face
      * @return
      */
     @PostMapping("/createOrUpdateFace")
     public ResultVo createOrUpdateFace(@RequestBody Face face) {
-        if (faceService.saveOrUpdate(face)){
+        if (faceService.saveOrUpdate(face)) {
             return ResultVo.success();
         }
         return ResultVo.error();

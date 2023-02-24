@@ -5,11 +5,10 @@ import com.ky.graduation.entity.Device;
 import com.ky.graduation.entity.Person;
 
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  * <p>
- *  Mapper 接口
+ * Mapper 接口
  * </p>
  *
  * @author Ky2Fe
@@ -19,6 +18,7 @@ public interface PersonMapper extends BaseMapper<Person> {
 
     /**
      * 查找该人员存在于哪些人脸机
+     *
      * @param personId
      * @return
      */

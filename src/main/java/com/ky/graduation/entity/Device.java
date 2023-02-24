@@ -4,13 +4,14 @@ import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
-import java.io.Serializable;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author Ky2Fe
@@ -23,7 +24,7 @@ public class Device implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     *  设备id
+     * 设备id
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;

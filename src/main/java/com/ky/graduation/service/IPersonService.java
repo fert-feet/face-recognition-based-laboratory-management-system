@@ -7,7 +7,7 @@ import com.ky.graduation.vo.AuthenticateLabToPersonVO;
 
 /**
  * <p>
- *  服务类
+ * 服务类
  * </p>
  *
  * @author Ky2Fe
@@ -17,6 +17,7 @@ public interface IPersonService extends IService<Person> {
 
     /**
      * 人员查询分页
+     *
      * @param page
      * @param limit
      * @param name
@@ -43,6 +44,7 @@ public interface IPersonService extends IService<Person> {
 
     /**
      * 新增或更新人员
+     *
      * @param person
      * @return
      */
@@ -50,6 +52,7 @@ public interface IPersonService extends IService<Person> {
 
     /**
      * 人员删除
+     *
      * @param id
      * @return
      */

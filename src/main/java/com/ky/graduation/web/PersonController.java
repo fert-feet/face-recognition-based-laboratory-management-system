@@ -1,6 +1,5 @@
 package com.ky.graduation.web;
 
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.ky.graduation.entity.Person;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IPersonService;
@@ -10,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author Ky2Fe
@@ -25,6 +24,7 @@ public class PersonController {
 
     /**
      * 人员查询分页
+     *
      * @param page
      * @param limit
      * @param name
@@ -37,11 +37,12 @@ public class PersonController {
             long limit,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String sort) {
-        return personService.listPerson(page, limit, name,sort);
+        return personService.listPerson(page, limit, name, sort);
     }
 
     /**
      * 人员注册或更新
+     *
      * @param person
      * @return
      */
@@ -52,6 +53,7 @@ public class PersonController {
 
     /**
      * 人员删除功能
+     *
      * @param id
      * @return
      */
@@ -62,6 +64,7 @@ public class PersonController {
 
     /**
      * 查询已授权给该人员的实验室
+     *
      * @param id
      * @return
      */
@@ -72,6 +75,7 @@ public class PersonController {
 
     /**
      * 新增多个实验室对人员的许可
+     *
      * @param authenticateVo
      * @return
      */

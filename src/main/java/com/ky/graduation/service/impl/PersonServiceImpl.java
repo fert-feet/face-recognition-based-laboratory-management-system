@@ -5,12 +5,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ky.graduation.device.RequestResult;
 import com.ky.graduation.entity.*;
 import com.ky.graduation.mapper.*;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IPersonService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ky.graduation.utils.CosRequest;
 import com.ky.graduation.utils.SendRequest;
 import com.ky.graduation.vo.AuthenticateLabToPersonVO;
@@ -25,7 +25,7 @@ import java.util.List;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author Ky2Fe
@@ -35,43 +35,30 @@ import java.util.List;
 @Slf4j
 public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> implements IPersonService {
 
+    private static final String SORT_REVERSE = "-id";
+    private static final String AUTHENTICATED_SQL = "SELECT lab_id FROM person_laboratory WHERE p_id=";
     @Resource
     private SendRequest sendRequest;
-
     @Resource
     private PersonMapper personMapper;
-
     @Resource
     private LaboratoryMapper laboratoryMapper;
-
     @Resource
     private FaceMapper faceMapper;
-
     @Resource
     private DeviceMapper deviceMapper;
-
     @Resource
     private CosRequest cosRequest;
-
     @Resource
     private PersonLaboratoryMapper personLaboratoryMapper;
-
     @Value("${requestUrl.person.createPerson}")
     private String createPersonUrl;
-
     @Value("${requestUrl.person.deletePerson}")
     private String deletePersonUrl;
-
     @Value("${requestUrl.face.createFace}")
     private String createFaceUrl;
-
     @Value("${requestUrl.person.updatePerson}")
     private String updatePersonUrl;
-
-    private static final String SORT_REVERSE = "-id";
-
-    private static final String AUTHENTICATED_SQL = "SELECT lab_id FROM person_laboratory WHERE p_id=";
-
 
     @Override
     public ResultVo listPerson(long page, long limit, String name, String sort) {
@@ -90,16 +77,16 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
         // 顺序排列
         wrapper.orderByAsc(Person::getId);
         Page<Person> selectPage = personMapper.selectPage(labPage, wrapper);
-        return ResultVo.success().data("items",selectPage.getRecords()).data("total",selectPage.getTotal());
+        return ResultVo.success().data("items", selectPage.getRecords()).data("total", selectPage.getTotal());
     }
 
     @Override
     public ResultVo findAuthenticatedLab(int id) {
         LambdaQueryWrapper<Laboratory> wrapper = Wrappers.lambdaQuery();
         // IN语句查询授权给人员的实验室
-        wrapper.inSql(Laboratory::getId,AUTHENTICATED_SQL+id);
+        wrapper.inSql(Laboratory::getId, AUTHENTICATED_SQL + id);
         List<Laboratory> laboratories = laboratoryMapper.selectList(wrapper);
-        return ResultVo.success().data("authorizedLabList",laboratories);
+        return ResultVo.success().data("authorizedLabList", laboratories);
     }
 
     @Override
@@ -117,12 +104,12 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
         });
         // 将对应人员分配的实验室都删除
         LambdaQueryWrapper<PersonLaboratory> wrapper = Wrappers.lambdaQuery();
-        wrapper.eq(PersonLaboratory::getPId,authenticateVO.getPersonId());
+        wrapper.eq(PersonLaboratory::getPId, authenticateVO.getPersonId());
         personLaboratoryMapper.delete(wrapper);
         Person person = new Person();
 
         // 传入的实验室id列表为空时，只更改人员分配状态
-        if (authenticateVO.getLabIdList().size() == 0){
+        if (authenticateVO.getLabIdList().size() == 0) {
             person.setId(authenticateVO.getPersonId());
             person.setIsDistributed((byte) 0);
             personMapper.updateById(person);
@@ -146,8 +133,8 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
                 // 人员添加
                 personJson.set("id", authenticateVO.getPersonId().toString());
                 personJson.set("name", selectPerson.getName());
-                personJson.set("iDNumber",selectPerson.getIdNumber());
-                personJson.set("password","123456");
+                personJson.set("iDNumber", selectPerson.getIdNumber());
+                personJson.set("password", "123456");
                 multiValueMap.set("pass", device.getPassword());
                 multiValueMap.set("person", personJson);
                 RequestResult createPersonResult = sendRequest.sendPostRequest(device.getIpAdress(), createPersonUrl, multiValueMap);
@@ -182,7 +169,7 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
             return ResultVo.success();
         }
         // 若已经写入人脸机中，则需要请求人脸机进行修改
-        if (person.getIsDistributed() == 1){
+        if (person.getIsDistributed() == 1) {
             // 查找人员所在的各设备
             List<Device> deviceList = personMapper.findDeviceListContainPerson(person.getId());
             LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
@@ -212,7 +199,7 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
         // 查询人员是否存在于设备中
         LinkedList<Device> deviceList = personMapper.findDeviceListContainPerson(id);
         //若存在，则删除设备中此人员以及照片
-        if (deviceList.size() > 0){
+        if (deviceList.size() > 0) {
             deviceList.forEach(device -> {
                 LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
                 multiValueMap.set("pass", device.getPassword());
@@ -226,13 +213,13 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
         faceWrapper.eq(Face::getPersonId, id);
         List<Face> faceList = faceMapper.selectList(faceWrapper);
         // 若有人脸信息，循环向云端发起删除请求
-        if (faceList.size() > 0){
+        if (faceList.size() > 0) {
             faceList.forEach(face -> {
                 cosRequest.deleteObject(face.getName());
             });
         }
         // 操作数据库，级联删除，实验室授权关系与人员照片
-        if (personMapper.deleteById(id) > 0){
+        if (personMapper.deleteById(id) > 0) {
             return ResultVo.success();
         }
         return ResultVo.error();

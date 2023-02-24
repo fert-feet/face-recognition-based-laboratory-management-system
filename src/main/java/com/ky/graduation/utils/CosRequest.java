@@ -34,18 +34,31 @@ public class CosRequest {
     private CosConfig cosConfig;
 
     /**
-     * 上传文件初始化
+     * 将图片前缀进行替换
+     *
+     * @param str
      * @return
      */
-    public COSClient initCosClient(){
+    private static String getOriginUrl(String str) {
+        String regex = "-cope(?=\\.[^.]+$)";
+        return str.replaceAll(regex, "");
+    }
+
+    /**
+     * 上传文件初始化
+     *
+     * @return
+     */
+    public COSClient initCosClient() {
         COSCredentials cred = new BasicCOSCredentials(cosConfig.getSecretId(), cosConfig.getSecretKey());
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.setRegion(new Region(cosConfig.getRegionName()));
-        return new COSClient(cred,clientConfig);
+        return new COSClient(cred, clientConfig);
     }
 
     /**
      * 图片列表上传请求
+     *
      * @param imgMultiFileList
      * @return
      * @throws IOException
@@ -95,6 +108,7 @@ public class CosRequest {
 
     /**
      * 删除图片请求
+     *
      * @param key
      * @return
      */
@@ -102,21 +116,11 @@ public class CosRequest {
         COSClient cosClient = initCosClient();
         // 因为图像处理后会分为两个文件，一个一个源文件，一个处理后的文件，因此需要将两个都删除
         // 原文件
-        cosClient.deleteObject(cosConfig.getBucketName(),key);
+        cosClient.deleteObject(cosConfig.getBucketName(), key);
         // 处理后的文件
-        cosClient.deleteObject(cosConfig.getBucketName(),getOriginUrl(key));
+        cosClient.deleteObject(cosConfig.getBucketName(), getOriginUrl(key));
         cosClient.shutdown();
         return true;
-    }
-
-    /**
-     * 将图片前缀进行替换
-     * @param str
-     * @return
-     */
-    private static String getOriginUrl(String str) {
-        String regex = "-cope(?=\\.[^.]+$)";
-        return str.replaceAll(regex, "");
     }
 
 }

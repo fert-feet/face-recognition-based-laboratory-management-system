@@ -21,10 +21,9 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class SendRequest {
 
+    public static final String SUCCESS_CODE = "LAN_SUS-0";
     @Value("${requestUrl.baseUrl}")
     String baseUrl;
-
-    public static final String SUCCESS_CODE = "LAN_SUS-0";
 
     /**
      * 发送get请求（有参数）
@@ -43,11 +42,11 @@ public class SendRequest {
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(params, headers);
         // Url拼接
         String requestUrl = "http://" + ip + ":8090" + url;
-        log.info("requestUrl---{}",requestUrl);
+        log.info("requestUrl---{}", requestUrl);
         //执行HTTP请求，将返回的结构使用ResultVO类格式化
         ResponseEntity<JSONObject> response = client.exchange(requestUrl, method, requestEntity, JSONObject.class);
         RequestResult requestResult = JSONUtil.toBean(response.getBody(), RequestResult.class);
-        if (requestResult != null && !requestResult.getCode().equals(SUCCESS_CODE)){
+        if (requestResult != null && !requestResult.getCode().equals(SUCCESS_CODE)) {
             throw new HttpException(requestResult.getMsg());
         }
         return requestResult;
@@ -68,18 +67,18 @@ public class SendRequest {
         //将请求头部和参数合成一个请求
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
         String requestUrl = "http://" + ip + ":8090" + url;
-        log.info("requestUrl---{}",requestUrl);
+        log.info("requestUrl---{}", requestUrl);
         //执行HTTP请求，将返回的结构使用ResultVO类格式化
         ResponseEntity<JSONObject> response = client.exchange(requestUrl, method, requestEntity, JSONObject.class);
         RequestResult requestResult = JSONUtil.toBean(response.getBody(), RequestResult.class);
-        if (requestResult != null && !requestResult.getCode().equals(SUCCESS_CODE)){
+        if (requestResult != null && !requestResult.getCode().equals(SUCCESS_CODE)) {
             throw new HttpException(requestResult.getMsg());
         }
         return requestResult;
     }
 
     /**
-     *发送POST请求
+     * 发送POST请求
      *
      * @param url
      * @param params
@@ -94,11 +93,11 @@ public class SendRequest {
         //将请求头部和参数合成一个请求
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(params, headers);
         String requestUrl = "http://" + ip + ":8090" + url;
-        log.info("requestUrl---{}",requestUrl);
+        log.info("requestUrl---{}", requestUrl);
         //执行HTTP请求，将返回的结构使用ResultVO类格式化
         ResponseEntity<JSONObject> response = client.exchange(requestUrl, method, requestEntity, JSONObject.class);
         RequestResult requestResult = JSONUtil.toBean(response.getBody(), RequestResult.class);
-        if (requestResult != null && !requestResult.getCode().equals(SUCCESS_CODE)){
+        if (requestResult != null && !requestResult.getCode().equals(SUCCESS_CODE)) {
             throw new HttpException(requestResult.getMsg());
         }
         return requestResult;

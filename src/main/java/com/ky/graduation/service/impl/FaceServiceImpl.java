@@ -2,6 +2,7 @@ package com.ky.graduation.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ky.graduation.device.RequestResult;
 import com.ky.graduation.entity.Device;
 import com.ky.graduation.entity.Face;
@@ -11,7 +12,6 @@ import com.ky.graduation.mapper.PersonMapper;
 import com.ky.graduation.result.ResultCode;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IFaceService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ky.graduation.utils.CosRequest;
 import com.ky.graduation.utils.SendRequest;
 import com.ky.graduation.vo.CosConfig;
@@ -29,7 +29,7 @@ import java.util.List;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author Ky2Fe
@@ -63,26 +63,26 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
     @Override
     public ResultVo login(WeChatLoginVO weChatLoginVO) {
         LambdaQueryWrapper<Person> wrapper = Wrappers.lambdaQuery();
-        wrapper.eq(Person::getIdNumber,weChatLoginVO.getIdNumber()).eq(Person::getPassword,weChatLoginVO.getPassword());
+        wrapper.eq(Person::getIdNumber, weChatLoginVO.getIdNumber()).eq(Person::getPassword, weChatLoginVO.getPassword());
         Person person = personMapper.selectOne(wrapper);
         if (person == null) {
             return ResultVo.error().status(ResultCode.VALIDATE_ERROR);
         }
         // 成功并返回个人信息
-        return ResultVo.success().data("personInfo",person);
+        return ResultVo.success().data("personInfo", person);
     }
 
     @Override
     public ResultVo findPersonFace(int personId) {
         LambdaQueryWrapper<Face> wrapper = Wrappers.lambdaQuery();
-        wrapper.eq(Face::getPersonId,personId);
+        wrapper.eq(Face::getPersonId, personId);
         List<Face> faceList = faceMapper.selectList(wrapper);
-        return ResultVo.success().data("faceList",faceList);
+        return ResultVo.success().data("faceList", faceList);
     }
 
     @Override
     public ResultVo faceUpload(List<MultipartFile> imgList, int personId) throws IOException {
-        log.info("personId---{}",personId);
+        log.info("personId---{}", personId);
         // 上传COS存储
         LinkedList<String> keyList = cosRequest.putObject(imgList);
         LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
@@ -97,8 +97,8 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
             face.setUrl(faceUrl);
             face.setPersonId(personId);
             face.setName(key);
-            if (faceMapper.insert(face) > 0 && deviceList.size() > 0){
-                log.info("插入---{}",face.getFaceId());
+            if (faceMapper.insert(face) > 0 && deviceList.size() > 0) {
+                log.info("插入---{}", face.getFaceId());
                 multiValueMap.set("faceId", face.getFaceId().toString());
                 // 若人员已经分配实验室（存在于人脸机中），则上传人脸机
                 deviceList.forEach(device -> {
@@ -132,12 +132,12 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
                 log.info("deleteFaceRequest---{}", deleteFaceRequest);
             });
         }
-        if (faceMapper.deleteById(faceId) < 1){
+        if (faceMapper.deleteById(faceId) < 1) {
             return ResultVo.error();
         }
         // 若该人员已经没有人脸，则改变人脸设置状态
         LambdaQueryWrapper<Face> wrapper = Wrappers.lambdaQuery();
-        wrapper.eq(Face::getPersonId,personId);
+        wrapper.eq(Face::getPersonId, personId);
         List<Face> faceList = faceMapper.selectList(wrapper);
         if (faceList.size() == 0) {
             Person person = new Person();

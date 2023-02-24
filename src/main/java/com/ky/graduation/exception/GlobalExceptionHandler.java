@@ -30,10 +30,11 @@ public class GlobalExceptionHandler {
 
     /**
      * 数据库异常
+     *
      * @param e
      * @return ResultVo
      */
-    @ExceptionHandler( value = SQLException.class )
+    @ExceptionHandler(value = SQLException.class)
     @ResponseBody
     public ResultVo sqlException(SQLException e) {
         log.error("数据库异常---{}", e.getMessage());
@@ -42,10 +43,11 @@ public class GlobalExceptionHandler {
 
     /**
      * 空指针异常
+     *
      * @param e
      * @return ResultVo
      */
-    @ExceptionHandler( value = NullPointerException.class)
+    @ExceptionHandler(value = NullPointerException.class)
     @ResponseBody
     public ResultVo nullPointExceptionHandler(NullPointerException e) {
         log.warn("空指针异常---{}", e.getMessage());
@@ -98,6 +100,7 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理传入参数空缺异常
+     *
      * @param e
      * @return
      */
@@ -111,6 +114,7 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理传入参数异常
+     *
      * @param e
      * @return
      */
@@ -124,6 +128,7 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理COS客户端异常
+     *
      * @param e
      * @return
      */
@@ -137,6 +142,7 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理COS服务端异常
+     *
      * @param e
      * @return
      */
@@ -150,6 +156,7 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理IO异常
+     *
      * @param e
      * @return
      */
@@ -163,6 +170,7 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理人脸机请求异常
+     *
      * @param e
      * @return
      */
@@ -173,8 +181,6 @@ public class GlobalExceptionHandler {
         log.error("人脸机请求异常---{}", e.getMessage());
         return ResultVo.error().status(ResultCode.DEVICE_REQUEST_ERROR);
     }
-
-
 
 
 }
