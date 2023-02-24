@@ -39,4 +39,11 @@ public interface IDeviceService extends IService<Device> {
      * @return
      */
     ResultVo createOrUpdate(Device device);
+
+    /**
+     * 设备删除
+     * @param id
+     * @return
+     */
+    ResultVo deleteDevice(int id);
 }

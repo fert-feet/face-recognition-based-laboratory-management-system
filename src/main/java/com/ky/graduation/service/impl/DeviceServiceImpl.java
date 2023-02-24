@@ -158,6 +158,21 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         return ResultVo.success();
     }
 
+    @Override
+    public ResultVo deleteDevice(int id) {
+        // 删除设备中所有人员信息
+        Device device = deviceMapper.selectById(id);
+        LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
+        multiValueMap.set("pass", device.getPassword());
+        multiValueMap.set("id", "-1");
+        sendRequest.sendPostRequest(device.getIpAdress(), deletePersonUrl, multiValueMap);
+        // 删除数据库中设备字段
+        if (deviceMapper.deleteById(id) > 0) {
+            return ResultVo.success();
+        }
+        return ResultVo.error();
+    }
+
     private ResultVo updateDeviceInfo(Device device) {
         // 若更改密码，则需请求设备进行更改
         Device selectDevice = deviceMapper.selectById(device.getId());

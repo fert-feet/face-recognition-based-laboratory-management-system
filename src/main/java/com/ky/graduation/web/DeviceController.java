@@ -57,10 +57,7 @@ public class DeviceController {
      */
     @PostMapping("/delete")
     public ResultVo delete(int id) {
-        if (deviceService.removeById(id)) {
-            return ResultVo.success();
-        }
-        return ResultVo.error();
+        return deviceService.deleteDevice(id);
     }
 
     /**
