@@ -1,6 +1,5 @@
 package com.ky.graduation.service.impl;
 
-import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -16,7 +15,7 @@ import com.ky.graduation.mapper.FaceMapper;
 import com.ky.graduation.mapper.LaboratoryMapper;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IDeviceService;
-import com.ky.graduation.utils.SendRequest;
+import com.ky.graduation.utils.SendDeviceRequest;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,7 +45,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
     @Resource
     private LaboratoryMapper laboratoryMapper;
     @Resource
-    private SendRequest sendRequest;
+    private SendDeviceRequest sendDeviceRequest;
     @Value("${requestUrl.person.deletePerson}")
     private String deletePersonUrl;
     @Value("${requestUrl.person.createPerson}")
@@ -90,62 +89,100 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
             deviceMapper.insert(device);
             return ResultVo.success();
         }
-        // 此情况为防止传入实验室信息为NULL且为编辑的情况
-        if (device.getLaboratoryName() == null) {
-            return updateDeviceInfo(device);
-        }
-        // 若传入实验室与设备绑定实验室相同，则为编辑设备信息操作
-        LambdaQueryWrapper<Device> deviceWrapper = Wrappers.lambdaQuery();
-        deviceWrapper.eq(Device::getLaboratoryName, device.getLaboratoryName()).eq(Device::getId, device.getId());
-        if (deviceMapper.exists(deviceWrapper)) {
+        // when received lab equals null or equals with origin lab, then this is an update device info request
+        if (device.getLaboratoryName() == null || compareBindLaboratory(device)) {
             return updateDeviceInfo(device);
         }
         LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
-        // 若为更新所属实验室状态（包括取消和更改），则首先清空该设备人员以及照片信息
-        multiValueMap.set("pass", device.getPassword());
-        multiValueMap.set("id", "-1");
-        RequestResult deletePersonRequest = sendRequest.sendPostRequest(device.getIpAdress(), deletePersonUrl, multiValueMap);
-        log.info("deletePersonRequest---{}", deletePersonRequest.getMsg());
+        // if update device belong-lab status,then delete all data in device first
+        sendDeviceRequest.deleteDevicePerson(device.getPassword(), device.getIpAdress(), "-1");
         // 取消分配实验室
         if (device.getLaboratoryName().equals("")) {
-            // 将实验室相关字段都置空
-            device.setLaboratoryName(null);
-            device.setLaboratoryId(null);
-            deviceMapper.updateById(device);
-            return ResultVo.success();
+            return cancelDistributeLab(device);
         }
-        // 若更改所属实验室，则同时更新所属实验室id
+        // change belongs lab
+        if (!changeDeviceBelongsLab(device)) {
+            return ResultVo.error();
+        }
+        return ResultVo.success();
+    }
+
+    /**
+     * 更改设备所属实验室
+     *
+     * @param device
+     * @return
+     */
+    private boolean changeDeviceBelongsLab(Device device) {
+        // if update belongs lab, then update id at the same time
         LambdaQueryWrapper<Laboratory> wrapper = Wrappers.lambdaQuery();
         wrapper.eq(Laboratory::getName, device.getLaboratoryName());
-        // 根据实验室名称更新实验室id
+        // update lab id according to lab name
         Laboratory laboratory = laboratoryMapper.selectOne(wrapper);
         device.setLaboratoryId(laboratory.getId());
-        deviceMapper.updateById(device);
-        // 将更改后的实验室中的人员迁移到此设备中
+        if (deviceMapper.updateById(device) < 1) {
+            return false;
+        }
+        // migrate person information in newly bind lab to device meanwhile
+        migratePersonInLabToDevice(device, laboratory);
+        return true;
+    }
+
+    /**
+     * migrate information to device
+     *
+     * @param device
+     * @param laboratory
+     * @return
+     */
+    private void migratePersonInLabToDevice(Device device, Laboratory laboratory) {
+        // find all person under this lab
         LinkedList<Person> authenticatedPersonList = laboratoryMapper.findAuthenticatedPerson(laboratory.getId());
-        JSONObject personJson = new JSONObject();
+        // create person id and photos in device
         authenticatedPersonList.forEach(person -> {
-            personJson.set("id", person.getId().toString());
-            personJson.set("name", person.getName());
-            personJson.set("iDNumber", person.getIdNumber());
-            personJson.set("password", "123456");
-            multiValueMap.set("person", personJson);
-            RequestResult createPersonRequest = sendRequest.sendPostRequest(device.getIpAdress(), createPersonUrl, multiValueMap);
-            log.info("createPersonRequest---{}", createPersonRequest.getMsg());
-            // 将人员照片也传入
-            LambdaQueryWrapper<Face> faceWrapper = Wrappers.lambdaQuery();
-            faceWrapper.eq(Face::getPersonId, person.getId());
-            List<Face> faceList = faceMapper.selectList(faceWrapper);
-            // 循环传入每个人的人脸照片
+            sendDeviceRequest.createDevicePerson(device.getPassword(), device.getIpAdress(), person);
+            // fetch person all face photos and send to device to create
+            List<Face> faceList = findAllPersonPhotos(person);
+            // send create face request to device
             faceList.forEach(face -> {
-                multiValueMap.set("pass", device.getPassword());
-                multiValueMap.set("personId", person.getId());
-                multiValueMap.set("faceId", face.getFaceId());
-                multiValueMap.set("url", face.getUrl());
-                sendRequest.sendPostRequest(device.getIpAdress(), createFaceUrl, multiValueMap);
+                sendDeviceRequest.createDevicePersonFace(device.getPassword(), device.getIpAdress(), face, person);
             });
         });
+    }
+
+    /**
+     * find all photos of person by person id
+     *
+     * @param person
+     * @return
+     */
+    private List<Face> findAllPersonPhotos(Person person) {
+        LambdaQueryWrapper<Face> faceWrapper = Wrappers.lambdaQuery();
+        faceWrapper.eq(Face::getPersonId, person.getId());
+        return faceMapper.selectList(faceWrapper);
+    }
+
+    /**
+     * 取消分配实验室
+     *
+     * @param device
+     */
+    private ResultVo cancelDistributeLab(Device device) {
+        device.setLaboratoryName(null);
+        device.setLaboratoryId(null);
+        if (deviceMapper.updateById(device) < 1) {
+            return ResultVo.error();
+        }
         return ResultVo.success();
+    }
+
+    private boolean compareBindLaboratory(Device device) {
+        LambdaQueryWrapper<Device> deviceWrapper = Wrappers.lambdaQuery();
+        // 匹配旧绑定实验室和新实验室
+        deviceWrapper
+                .eq(Device::getLaboratoryName, device.getLaboratoryName())
+                .eq(Device::getId, device.getId());
+        return deviceMapper.exists(deviceWrapper);
     }
 
     @Override
@@ -155,7 +192,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
         multiValueMap.set("pass", device.getPassword());
         multiValueMap.set("id", "-1");
-        sendRequest.sendPostRequest(device.getIpAdress(), deletePersonUrl, multiValueMap);
+        sendDeviceRequest.sendPostRequest(device.getIpAdress(), deletePersonUrl, multiValueMap);
         // 删除数据库中设备字段
         if (deviceMapper.deleteById(id) > 0) {
             return ResultVo.success();
@@ -172,7 +209,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
             multiValueMap.set("oldPass", selectDevice.getPassword());
             // 新密码
             multiValueMap.set("newPass", device.getPassword());
-            RequestResult setPassWordRequest = sendRequest.sendPostRequest(device.getIpAdress(), setPassWordUrl, multiValueMap);
+            RequestResult setPassWordRequest = sendDeviceRequest.sendPostRequest(device.getIpAdress(), setPassWordUrl, multiValueMap);
             log.info("setPassWordRequest---{}", setPassWordRequest.getMsg());
         }
         // 直接更新信息即可

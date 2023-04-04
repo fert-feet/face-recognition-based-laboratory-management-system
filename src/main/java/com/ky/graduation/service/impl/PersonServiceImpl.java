@@ -12,7 +12,7 @@ import com.ky.graduation.mapper.*;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IPersonService;
 import com.ky.graduation.utils.CosRequest;
-import com.ky.graduation.utils.SendRequest;
+import com.ky.graduation.utils.SendDeviceRequest;
 import com.ky.graduation.vo.AuthenticateLabToPersonVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
     private static final String SORT_REVERSE = "-id";
     private static final String AUTHENTICATED_SQL = "SELECT lab_id FROM person_laboratory WHERE p_id=";
     @Resource
-    private SendRequest sendRequest;
+    private SendDeviceRequest sendRequest;
     @Resource
     private PersonMapper personMapper;
     @Resource

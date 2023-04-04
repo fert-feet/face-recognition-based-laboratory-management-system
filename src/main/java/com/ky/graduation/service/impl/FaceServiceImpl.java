@@ -13,7 +13,7 @@ import com.ky.graduation.result.ResultCode;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IFaceService;
 import com.ky.graduation.utils.CosRequest;
-import com.ky.graduation.utils.SendRequest;
+import com.ky.graduation.utils.SendDeviceRequest;
 import com.ky.graduation.vo.CosConfig;
 import com.ky.graduation.vo.WeChatLoginVO;
 import jakarta.annotation.Resource;
@@ -52,7 +52,7 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
     private FaceMapper faceMapper;
 
     @Resource
-    private SendRequest sendRequest;
+    private SendDeviceRequest sendRequest;
 
     @Value("${requestUrl.face.createFace}")
     private String createFaceUrl;
@@ -62,6 +62,7 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
 
     @Override
     public ResultVo login(WeChatLoginVO weChatLoginVO) {
+        // 查询账号密码是否正确
         LambdaQueryWrapper<Person> wrapper = Wrappers.lambdaQuery();
         wrapper.eq(Person::getIdNumber, weChatLoginVO.getIdNumber()).eq(Person::getPassword, weChatLoginVO.getPassword());
         Person person = personMapper.selectOne(wrapper);

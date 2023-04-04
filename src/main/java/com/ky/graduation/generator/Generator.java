@@ -13,12 +13,12 @@ import java.util.Collections;
  **/
 
 public class Generator {
-    public static final String URL = "jdbc:mysql://localhost:3306/ky_graduate?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai";
+    public static final String URL = "jdbc:mysql://localhost:3306/aquarium?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai";
     public static final String USER_NAME = "root";
     public static final String PASS_WORD = "lwz7254591";
-    public static final String AUTHOR = "Ky2Fe";
+    public static final String AUTHOR = "tt-Tang";
     public static final String OUTPUT_DIR = "D:\\Project\\Graduate\\backend\\graduation\\src\\main\\java\\com\\ky\\graduation\\generator";
-    public static final String PARENT_DIR = "com";
+    public static final String PARENT_DIR = "com.aquarium";
     public static final String XML_DIR = "D:\\Project\\Graduate\\backend\\graduation\\src\\main\\java\\com\\ky\\graduation\\generator\\com\\fxml";
 
     public static void main(String[] args) {
@@ -33,7 +33,7 @@ public class Generator {
                 })
                 .strategyConfig(builder -> {
                     // 设置需要生成的表名
-                    builder.addInclude("face")
+                    builder.addInclude("sys_water_quality")
                             .entityBuilder()
                             //开启Lombok
                             .enableLombok()
