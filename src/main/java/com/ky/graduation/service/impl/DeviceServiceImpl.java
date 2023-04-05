@@ -38,6 +38,7 @@ import java.util.List;
 public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> implements IDeviceService {
 
     private static final String SORT_REVERSE = "-id";
+    public static final int CANCEL_CHOOSE_LAB_CODE = -1;
     @Resource
     private DeviceMapper deviceMapper;
     @Resource
@@ -83,20 +84,19 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
 
     @Override
     public ResultVo createOrUpdate(Device device) {
-        log.info("labName---{}", device.getLaboratoryName());
         // 为新增则直接操作数据库
         if (device.getId() == null) {
             deviceMapper.insert(device);
             return ResultVo.success();
         }
-        // when received lab equals null or equals with origin lab, then this is an update device info request
-        if (device.getLaboratoryName() == null || compareBindLaboratory(device)) {
+        // when received lab equals origin lab, then this is an update device info request
+        if (compareBindLaboratory(device)) {
             return updateDeviceInfo(device);
         }
         // if update device belong-lab status,then delete all data in device first
-        sendDeviceRequest.deleteDevicePerson(device.getPassword(), device.getIpAdress(), "-1");
+        sendDeviceRequest.deleteDevicePerson(device.getPassword(), device.getIpAddress(), "-1");
         // cancel distribute lab to device
-        if (device.getLaboratoryName().equals("")) {
+        if (device.getLaboratoryId().equals(CANCEL_CHOOSE_LAB_CODE)) {
             return cancelDistributeLab(device);
         }
         // change belongs lab
@@ -113,17 +113,15 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
      * @return
      */
     private boolean changeDeviceBelongsLab(Device device) {
-        // if update belongs lab, then update id at the same time
-        LambdaQueryWrapper<Laboratory> wrapper = Wrappers.lambdaQuery();
-        wrapper.eq(Laboratory::getName, device.getLaboratoryName());
+        // if update belongs lab, then update labName in device at the same time
         // update lab id according to lab name
-        Laboratory laboratory = laboratoryMapper.selectOne(wrapper);
-        device.setLaboratoryId(laboratory.getId());
+        String labName = laboratoryMapper.selectById(device.getLaboratoryId()).getName();
+        device.setLaboratoryName(labName);
         if (deviceMapper.updateById(device) < 1) {
             return false;
         }
         // migrate person information in newly bind lab to device meanwhile
-        migratePersonInLabToDevice(device, laboratory);
+        migratePersonInLabToDevice(device);
         return true;
     }
 
@@ -131,20 +129,19 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
      * migrate information to device
      *
      * @param device
-     * @param laboratory
      * @return
      */
-    private void migratePersonInLabToDevice(Device device, Laboratory laboratory) {
+    private void migratePersonInLabToDevice(Device device) {
         // find all person under this lab
-        LinkedList<Person> authenticatedPersonList = laboratoryMapper.findAuthenticatedPerson(laboratory.getId());
+        LinkedList<Person> authenticatedPersonList = laboratoryMapper.findAuthenticatedPerson(device.getLaboratoryId());
         // create person id and photos in device
         authenticatedPersonList.forEach(person -> {
-            sendDeviceRequest.createDevicePerson(device.getPassword(), device.getIpAdress(), person);
+            sendDeviceRequest.createDevicePerson(device.getPassword(), device.getIpAddress(), person);
             // fetch person all face photos and send to device to create
             List<Face> faceList = findAllPersonPhotos(person);
             // send create face request to device
             faceList.forEach(face -> {
-                sendDeviceRequest.createDevicePersonFace(device.getPassword(), device.getIpAdress(), face, person);
+                sendDeviceRequest.createDevicePersonFace(device.getPassword(), device.getIpAddress(), face, person);
             });
         });
     }
@@ -180,8 +177,8 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         LambdaQueryWrapper<Device> deviceWrapper = Wrappers.lambdaQuery();
         // 匹配旧绑定实验室和新实验室
         deviceWrapper
-                .eq(Device::getLaboratoryName, device.getLaboratoryName())
-                .eq(Device::getId, device.getId());
+                .eq(Device::getId, device.getId())
+                .eq(Device::getLaboratoryId, device.getLaboratoryId());
         return deviceMapper.exists(deviceWrapper);
     }
 
@@ -192,7 +189,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
         multiValueMap.set("pass", device.getPassword());
         multiValueMap.set("id", "-1");
-        sendDeviceRequest.sendPostRequest(device.getIpAdress(), deletePersonUrl, multiValueMap);
+        sendDeviceRequest.sendPostRequest(device.getIpAddress(), deletePersonUrl, multiValueMap);
         // 删除数据库中设备字段
         if (deviceMapper.deleteById(id) > 0) {
             return ResultVo.success();
@@ -203,7 +200,11 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
     @Override
     public ResultVo belongLab(int deviceId) {
         Device device = deviceMapper.selectById(deviceId);
-        return ResultVo.success().data("selectedLabId", device.getLaboratoryId());
+        // set lab info
+        Laboratory laboratory = new Laboratory();
+        laboratory.setId(device.getLaboratoryId());
+        laboratory.setName(device.getLaboratoryName());
+        return ResultVo.success().data("item", laboratory);
     }
 
     private ResultVo updateDeviceInfo(Device device) {
@@ -215,7 +216,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
             multiValueMap.set("oldPass", selectDevice.getPassword());
             // 新密码
             multiValueMap.set("newPass", device.getPassword());
-            RequestResult setPassWordRequest = sendDeviceRequest.sendPostRequest(device.getIpAdress(), setPassWordUrl, multiValueMap);
+            RequestResult setPassWordRequest = sendDeviceRequest.sendPostRequest(device.getIpAddress(), setPassWordUrl, multiValueMap);
             log.info("setPassWordRequest---{}", setPassWordRequest.getMsg());
         }
         // 直接更新信息即可

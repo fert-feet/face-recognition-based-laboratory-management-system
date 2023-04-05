@@ -149,4 +149,5 @@ public class LaboratoryController {
     public ResultVo deviceList(String labName) {
         return laboratoryService.deviceList(labName);
     }
+
 }

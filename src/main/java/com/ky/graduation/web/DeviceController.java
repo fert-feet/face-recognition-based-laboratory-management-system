@@ -75,7 +75,7 @@ public class DeviceController {
     }
 
     /**
-     * get belongs lab info
+     * get belongs lab
      *
      * @param deviceId
      */

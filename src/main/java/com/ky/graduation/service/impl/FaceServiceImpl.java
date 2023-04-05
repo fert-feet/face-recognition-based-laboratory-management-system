@@ -105,7 +105,7 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
                 deviceList.forEach(device -> {
                     multiValueMap.set("pass", device.getPassword());
                     // 上传人脸到人脸机
-                    RequestResult createFaceRequest = sendRequest.sendPostRequest(device.getIpAdress(), createFaceUrl, multiValueMap);
+                    RequestResult createFaceRequest = sendRequest.sendPostRequest(device.getIpAddress(), createFaceUrl, multiValueMap);
                     log.info("createFaceRequest---{}", createFaceRequest.getMsg());
                 });
             }
@@ -129,7 +129,7 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
                 multiValueMap.set("pass", device.getPassword());
                 multiValueMap.set("faceId", faceId);
                 // 请求设备删除人脸
-                RequestResult deleteFaceRequest = sendRequest.sendPostRequest(device.getIpAdress(), deleteFaceUrl, multiValueMap);
+                RequestResult deleteFaceRequest = sendRequest.sendPostRequest(device.getIpAddress(), deleteFaceUrl, multiValueMap);
                 log.info("deleteFaceRequest---{}", deleteFaceRequest);
             });
         }

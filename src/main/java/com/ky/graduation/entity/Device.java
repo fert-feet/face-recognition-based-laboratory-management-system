@@ -35,7 +35,7 @@ public class Device implements Serializable {
     /**
      * 设备IP地址
      */
-    private String ipAdress;
+    private String ipAddress;
 
     /**
      * 设备序列号

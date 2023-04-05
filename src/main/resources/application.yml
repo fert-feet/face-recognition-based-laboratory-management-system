@@ -17,6 +17,8 @@ tencent:
       bucketName: ky2fe-1316858065
       regionName: ap-chengdu
       cosHost: https://ky2fe-1316858065.cos.ap-chengdu.myqcloud.com
+deviceOption:
+  isOpenDevice: false
 
 requestUrl:
   # 基础

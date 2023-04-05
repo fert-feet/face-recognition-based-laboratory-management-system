@@ -155,7 +155,7 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
     private void deviceAppendPerson(List<Device> devices, List<Face> faces, Person person) {
         devices.forEach(device -> {
             // append person into device
-            sendDeviceRequest.createDevicePerson(device.getPassword(), device.getIpAdress(), person);
+            sendDeviceRequest.createDevicePerson(device.getPassword(), device.getIpAddress(), person);
             // 遍历人脸照片列表，添加到每个人脸机，双重循环不可避免
             appendPersonPhotosIntoDevice(device, faces, person);
         });
@@ -171,7 +171,7 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
     private void appendPersonPhotosIntoDevice(Device device, List<Face> faces, Person person) {
         faces.forEach(face -> {
             // raise append photos request to device
-            sendDeviceRequest.createDevicePersonFace(device.getPassword(), device.getIpAdress(), face, person);
+            sendDeviceRequest.createDevicePersonFace(device.getPassword(), device.getIpAddress(), face, person);
         });
     }
 
@@ -233,7 +233,7 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
         LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
         deviceList.forEach(device -> {
             // delete person and photos in device
-            sendDeviceRequest.deleteDevicePerson(device.getPassword(), device.getIpAdress(), authenticateVO.getPersonId().toString());
+            sendDeviceRequest.deleteDevicePerson(device.getPassword(), device.getIpAddress(), authenticateVO.getPersonId().toString());
         });
     }
 
@@ -260,7 +260,7 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
                 multiValueMap.set("person", personJson);
                 multiValueMap.set("pass", device.getPassword());
                 // 发起请求
-                RequestResult requestResult = sendDeviceRequest.sendPostRequest(device.getIpAdress(), updatePersonUrl, multiValueMap);
+                RequestResult requestResult = sendDeviceRequest.sendPostRequest(device.getIpAddress(), updatePersonUrl, multiValueMap);
                 log.info("requestResult---{}", requestResult.getMsg());
             });
         }
@@ -280,7 +280,7 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
                 LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
                 multiValueMap.set("pass", device.getPassword());
                 multiValueMap.set("id", id);
-                RequestResult deletePersonRequest = sendDeviceRequest.sendPostRequest(device.getIpAdress(), deletePersonUrl, multiValueMap);
+                RequestResult deletePersonRequest = sendDeviceRequest.sendPostRequest(device.getIpAddress(), deletePersonUrl, multiValueMap);
                 log.info("deletePersonRequest---{}", deletePersonRequest.getMsg());
             });
         }

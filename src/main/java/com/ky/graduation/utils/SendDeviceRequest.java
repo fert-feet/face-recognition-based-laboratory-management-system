@@ -37,6 +37,9 @@ public class SendDeviceRequest {
     @Value("${requestUrl.person.deletePerson}")
     private String deletePersonUrl;
 
+    @Value("${deviceOption.isOpenDevice}")
+    private boolean isOpenDevice;
+
     /**
      * 发送get请求（有参数）
      *
@@ -97,6 +100,10 @@ public class SendDeviceRequest {
      * @return JSONObject
      */
     public RequestResult sendPostRequest(String ip, String url, MultiValueMap<String, Object> params) {
+        // skip device request when isOpenDevice is false
+        if (!isOpenDevice) {
+            return new RequestResult();
+        }
         RestTemplate client = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         HttpMethod method = HttpMethod.POST;
