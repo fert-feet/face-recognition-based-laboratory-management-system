@@ -96,7 +96,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
         // if update device belong-lab status,then delete all data in device first
         sendDeviceRequest.deleteDevicePerson(device.getPassword(), device.getIpAdress(), "-1");
-        // 取消分配实验室
+        // cancel distribute lab to device
         if (device.getLaboratoryName().equals("")) {
             return cancelDistributeLab(device);
         }

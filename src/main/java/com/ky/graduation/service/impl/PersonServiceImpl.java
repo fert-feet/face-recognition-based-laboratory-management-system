@@ -38,7 +38,7 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
     private static final String SORT_REVERSE = "-id";
     private static final String AUTHENTICATED_SQL = "SELECT lab_id FROM person_laboratory WHERE p_id=";
     @Resource
-    private SendDeviceRequest sendRequest;
+    private SendDeviceRequest sendDeviceRequest;
     @Resource
     private PersonMapper personMapper;
     @Resource
@@ -92,73 +92,149 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
     @Override
     public ResultVo authenticateToPerson(AuthenticateLabToPersonVO authenticateVO) {
         // 删除存在于各实验室人脸机中该人员的信息
-        List<Device> deviceList = personMapper.findDeviceListContainPerson(authenticateVO.getPersonId());
-        LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
-        // 循环向各个人脸机发送删除请求
-        deviceList.forEach(device -> {
-            // 人员删除，同时清空人员人脸
-            multiValueMap.set("pass", device.getPassword());
-            multiValueMap.set("id", authenticateVO.getPersonId().toString());
-            RequestResult deletePersonResult = sendRequest.sendPostRequest(device.getIpAdress(), deletePersonUrl, multiValueMap);
-            log.info("deletePersonResult---{}", deletePersonResult.getMsg());
-        });
+        deletePersonInAllDevice(authenticateVO);
         // 将对应人员分配的实验室都删除
-        LambdaQueryWrapper<PersonLaboratory> wrapper = Wrappers.lambdaQuery();
-        wrapper.eq(PersonLaboratory::getPId, authenticateVO.getPersonId());
-        personLaboratoryMapper.delete(wrapper);
-        Person person = new Person();
-
+        if (!deleteLabDistributedToPerson(authenticateVO)) {
+            return ResultVo.error();
+        }
         // 传入的实验室id列表为空时，只更改人员分配状态
         if (authenticateVO.getLabIdList().size() == 0) {
-            person.setId(authenticateVO.getPersonId());
-            person.setIsDistributed((byte) 0);
-            personMapper.updateById(person);
-            return ResultVo.success();
+            if (!changePersonDistributeStatus(authenticateVO, (byte) 0)) {
+                return ResultVo.error();
+            }
         }
         // id列表不为空时，循环插入数据库，请求各人脸机新增人员
         authenticateVO.getLabIdList().forEach(labId -> {
-            LambdaQueryWrapper<Device> query = Wrappers.lambdaQuery();
-            query.eq(Device::getLaboratoryId, labId);
-            // 找到该每个实验室对应的人脸机
-            List<Device> devices = deviceMapper.selectList(query);
-            // 查询该人员信息
-            Person selectPerson = personMapper.selectById(authenticateVO.getPersonId());
-            JSONObject personJson = new JSONObject();
-            // 查询人员照片
-            LambdaQueryWrapper<Face> faceWrapper = Wrappers.lambdaQuery();
-            faceWrapper.eq(Face::getPersonId, authenticateVO.getPersonId());
-            List<Face> faceList = faceMapper.selectList(faceWrapper);
-            // 循环对人脸机发起请求，该双重循环不可避免
-            devices.forEach(device -> {
-                // 人员添加
-                personJson.set("id", authenticateVO.getPersonId().toString());
-                personJson.set("name", selectPerson.getName());
-                personJson.set("iDNumber", selectPerson.getIdNumber());
-                personJson.set("password", "123456");
-                multiValueMap.set("pass", device.getPassword());
-                multiValueMap.set("person", personJson);
-                RequestResult createPersonResult = sendRequest.sendPostRequest(device.getIpAdress(), createPersonUrl, multiValueMap);
-                log.info("createPersonResult---{}", createPersonResult.getMsg());
-                // 遍历人脸照片列表，添加到每个人脸机，双重循环不可避免
-                faceList.forEach(face -> {
-                    multiValueMap.set("personId", authenticateVO.getPersonId().toString());
-                    multiValueMap.set("faceId", face.getFaceId().toString());
-                    multiValueMap.set("url", face.getUrl());
-                    sendRequest.sendPostRequest(device.getIpAdress(), createFaceUrl, multiValueMap);
-                });
-            });
-            // 每个循环都需要创建对象
-            PersonLaboratory personLaboratory = new PersonLaboratory();
-            // 添加人员与实验室授权关系
-            personLaboratory.setPId(authenticateVO.getPersonId());
-            personLaboratory.setLabId(labId);
-            personLaboratoryMapper.insert(personLaboratory);
-            // 添加人员授权状态
-            person.setId(authenticateVO.getPersonId());
-            person.setIsDistributed((byte) 1);
-            personMapper.updateById(person);
+            // append person into device
+            appendPersonIntoDevices(authenticateVO, labId);
+            // append person-lab relationship into db
+            appendRelationship(authenticateVO, labId);
+            // change distributed status
+            changePersonDistributeStatus(authenticateVO, (byte) 1);
         });
         return ResultVo.success();
+    }
+
+    /**
+     * append person-lab relationship
+     *
+     * @param authenticateVO
+     * @param labId
+     */
+    private boolean appendRelationship(AuthenticateLabToPersonVO authenticateVO, Integer labId) {
+        PersonLaboratory personLaboratory = new PersonLaboratory();
+        // 添加人员与实验室授权关系
+        personLaboratory.setPId(authenticateVO.getPersonId());
+        personLaboratory.setLabId(labId);
+        return personLaboratoryMapper.insert(personLaboratory) >= 1;
+    }
+
+    /**
+     * append person information into devices
+     *
+     * @param authenticateVO
+     * @param labId
+     */
+    private void appendPersonIntoDevices(AuthenticateLabToPersonVO authenticateVO, Integer labId) {
+        // find devices that bind lab
+        List<Device> devices = findDevicesOfLab(labId);
+        // 查询该人员信息
+        Person person = personMapper.selectById(authenticateVO.getPersonId());
+        // 查询人员照片
+        List<Face> faces = findFacesOfPerson(authenticateVO.getPersonId());
+        deviceAppendPerson(devices, faces, person);
+    }
+
+    /**
+     * request to device of append person into device
+     *
+     * @param devices
+     * @param faces
+     * @param person
+     */
+    private void deviceAppendPerson(List<Device> devices, List<Face> faces, Person person) {
+        devices.forEach(device -> {
+            // append person into device
+            sendDeviceRequest.createDevicePerson(device.getPassword(), device.getIpAdress(), person);
+            // 遍历人脸照片列表，添加到每个人脸机，双重循环不可避免
+            appendPersonPhotosIntoDevice(device, faces, person);
+        });
+    }
+
+    /**
+     * append photos into device
+     *
+     * @param device
+     * @param faces
+     * @param person
+     */
+    private void appendPersonPhotosIntoDevice(Device device, List<Face> faces, Person person) {
+        faces.forEach(face -> {
+            // raise append photos request to device
+            sendDeviceRequest.createDevicePersonFace(device.getPassword(), device.getIpAdress(), face, person);
+        });
+    }
+
+    /**
+     * find all photos info of person
+     *
+     * @param personId
+     * @return
+     */
+    private List<Face> findFacesOfPerson(Integer personId) {
+        LambdaQueryWrapper<Face> faceWrapper = Wrappers.lambdaQuery();
+        faceWrapper.eq(Face::getPersonId, personId);
+        return faceMapper.selectList(faceWrapper);
+    }
+
+    /**
+     * find all devices of lab
+     *
+     * @param labId
+     * @return
+     */
+    private List<Device> findDevicesOfLab(Integer labId) {
+        LambdaQueryWrapper<Device> query = Wrappers.lambdaQuery();
+        query.eq(Device::getLaboratoryId, labId);
+        // 找到该每个实验室对应的人脸机
+        return deviceMapper.selectList(query);
+    }
+
+    /**
+     * change person distributed status
+     *
+     * @param authenticateVO
+     */
+    private boolean changePersonDistributeStatus(AuthenticateLabToPersonVO authenticateVO, byte distributedStatus) {
+        Person person = new Person();
+        person.setId(authenticateVO.getPersonId());
+        person.setIsDistributed(distributedStatus);
+        return personMapper.updateById(person) >= 1;
+    }
+
+    /**
+     * delete all relationship of person and lab
+     *
+     * @param authenticateVO
+     */
+    private boolean deleteLabDistributedToPerson(AuthenticateLabToPersonVO authenticateVO) {
+        LambdaQueryWrapper<PersonLaboratory> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(PersonLaboratory::getPId, authenticateVO.getPersonId());
+        return personLaboratoryMapper.delete(wrapper) >= 1;
+    }
+
+    /**
+     * delete person info in all device
+     *
+     * @param authenticateVO
+     */
+    private void deletePersonInAllDevice(AuthenticateLabToPersonVO authenticateVO) {
+        List<Device> deviceList = personMapper.findDeviceListContainPerson(authenticateVO.getPersonId());
+        LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
+        deviceList.forEach(device -> {
+            // delete person and photos in device
+            sendDeviceRequest.deleteDevicePerson(device.getPassword(), device.getIpAdress(), authenticateVO.getPersonId().toString());
+        });
     }
 
     @Override
@@ -184,7 +260,7 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
                 multiValueMap.set("person", personJson);
                 multiValueMap.set("pass", device.getPassword());
                 // 发起请求
-                RequestResult requestResult = sendRequest.sendPostRequest(device.getIpAdress(), updatePersonUrl, multiValueMap);
+                RequestResult requestResult = sendDeviceRequest.sendPostRequest(device.getIpAdress(), updatePersonUrl, multiValueMap);
                 log.info("requestResult---{}", requestResult.getMsg());
             });
         }
@@ -204,7 +280,7 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
                 LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
                 multiValueMap.set("pass", device.getPassword());
                 multiValueMap.set("id", id);
-                RequestResult deletePersonRequest = sendRequest.sendPostRequest(device.getIpAdress(), deletePersonUrl, multiValueMap);
+                RequestResult deletePersonRequest = sendDeviceRequest.sendPostRequest(device.getIpAdress(), deletePersonUrl, multiValueMap);
                 log.info("deletePersonRequest---{}", deletePersonRequest.getMsg());
             });
         }
