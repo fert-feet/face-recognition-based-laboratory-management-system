@@ -52,7 +52,7 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
     private FaceMapper faceMapper;
 
     @Resource
-    private SendDeviceRequest sendRequest;
+    private SendDeviceRequest sendDeviceRequest;
 
     @Value("${requestUrl.face.createFace}")
     private String createFaceUrl;
@@ -83,43 +83,98 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
 
     @Override
     public ResultVo faceUpload(List<MultipartFile> imgList, int personId) throws IOException {
-        log.info("personId---{}", personId);
         // 上传COS存储
         LinkedList<String> keyList = cosRequest.putObject(imgList);
-        LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
-        multiValueMap.set("personId", personId);
-        // 找到包含该人员的设备进行人脸上传
+        // upload face to device
+        uploadFaceToDevice(keyList, personId);
+        // 将是否设置人脸变为已设置
+        return changePersonPhotosStatus(personId, (byte) 1);
+    }
+
+    /**
+     * change isSetFace status
+     *
+     * @param personId
+     * @param setPhotosStatus
+     * @return
+     */
+    private ResultVo changePersonPhotosStatus(int personId, byte setPhotosStatus) {
+        Person person = new Person();
+        person.setId(personId);
+        person.setIsSetFace(setPhotosStatus);
+        if (personMapper.updateById(person) < 1) {
+            return ResultVo.error();
+        }
+        return ResultVo.success();
+    }
+
+    /**
+     * upload face photos to device
+     *
+     * @param keyList
+     * @param personId
+     */
+    private void uploadFaceToDevice(LinkedList<String> keyList, int personId) {
+        // find all devices that contain this person and do upload
         List<Device> deviceList = personMapper.findDeviceListContainPerson(personId);
         keyList.forEach(key -> {
             // 拼接人脸链接
             String faceUrl = cosConfig.getCosHost() + "/" + key;
-            multiValueMap.set("url", faceUrl);
-            Face face = new Face();
-            face.setUrl(faceUrl);
-            face.setPersonId(personId);
-            face.setName(key);
-            if (faceMapper.insert(face) > 0 && deviceList.size() > 0) {
-                log.info("插入---{}", face.getFaceId());
-                multiValueMap.set("faceId", face.getFaceId().toString());
-                // 若人员已经分配实验室（存在于人脸机中），则上传人脸机
-                deviceList.forEach(device -> {
-                    multiValueMap.set("pass", device.getPassword());
-                    // 上传人脸到人脸机
-                    RequestResult createFaceRequest = sendRequest.sendPostRequest(device.getIpAddress(), createFaceUrl, multiValueMap);
-                    log.info("createFaceRequest---{}", createFaceRequest.getMsg());
-                });
+            // upload face to db
+            Face face = insertFaceIntoDB(key, faceUrl, personId);
+            // raise upload request to db
+            if (deviceList.size() > 0) {
+                raiseFaceReqToDB(deviceList, face, buildPersonForDeviceReq(personId));
             }
         });
-        // 将是否设置人脸变为已设置
+    }
+
+    /**
+     * raise upload face photos request to device
+     *
+     * @param deviceList
+     * @param face
+     * @param person
+     */
+    private void raiseFaceReqToDB(List<Device> deviceList, Face face, Person person) {
+        deviceList.forEach(device -> {
+            sendDeviceRequest.createDevicePersonFace(device.getPassword(), device.getPassword(), face, person);
+        });
+    }
+
+    /**
+     * build person object
+     *
+     * @param personId
+     * @return
+     */
+    private Person buildPersonForDeviceReq(int personId) {
         Person person = new Person();
         person.setId(personId);
-        person.setIsSetFace((byte) 1);
-        personMapper.updateById(person);
-        return ResultVo.success();
+        return person;
+    }
+
+    /**
+     * insert face into db
+     *
+     * @param key
+     * @param faceUrl
+     * @param personId
+     */
+    private Face insertFaceIntoDB(String key, String faceUrl, int personId) {
+        Face face = new Face();
+        face.setUrl(faceUrl);
+        face.setPersonId(personId);
+        face.setName(key);
+        if (faceMapper.insert(face) < 1) {
+            return null;
+        }
+        return face;
     }
 
     @Override
     public ResultVo deleteFace(int faceId, int personId) {
+        //TODO change delete logic
         Face face = faceMapper.selectById(faceId);
         // 删除每个设备中这个人的此张相片
         LinkedList<Device> deviceList = personMapper.findDeviceListContainPerson(personId);
@@ -129,7 +184,7 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
                 multiValueMap.set("pass", device.getPassword());
                 multiValueMap.set("faceId", faceId);
                 // 请求设备删除人脸
-                RequestResult deleteFaceRequest = sendRequest.sendPostRequest(device.getIpAddress(), deleteFaceUrl, multiValueMap);
+                RequestResult deleteFaceRequest = sendDeviceRequest.sendPostRequest(device.getIpAddress(), deleteFaceUrl, multiValueMap);
                 log.info("deleteFaceRequest---{}", deleteFaceRequest);
             });
         }

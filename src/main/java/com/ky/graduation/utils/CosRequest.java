@@ -12,6 +12,7 @@ import com.qcloud.cos.model.ciModel.persistence.PicOperations;
 import com.qcloud.cos.region.Region;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,8 +31,12 @@ import java.util.List;
 @Slf4j
 public class CosRequest {
 
+    public static final String PIC_RULE = "imageMogr2/scrop/720x1280/size-limit/1m!";
     @Resource
     private CosConfig cosConfig;
+
+    @Value("${pictureUploadOption.isEnableUploadToCOS}")
+    private boolean isEnableUploadToCOS;
 
     /**
      * 将图片前缀进行替换
@@ -50,7 +55,7 @@ public class CosRequest {
      * @return
      */
     public COSClient initCosClient() {
-        COSCredentials cred = new BasicCOSCredentials(cosConfig.getSecretId() + "3", cosConfig.getSecretKey() + "Y");
+        COSCredentials cred = new BasicCOSCredentials(System.getenv("secretId"), System.getenv("secretKey"));
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.setRegion(new Region(cosConfig.getRegionName()));
         return new COSClient(cred, clientConfig);
@@ -69,41 +74,76 @@ public class CosRequest {
         LinkedList<File> imgFileList = FileUtils.multipartFileToFile(imgMultiFileList);
         // 存储key
         LinkedList<String> keyLinkedList = new LinkedList<>();
+
+        imgFileList.forEach(imgFile -> {
+            String key = imgFile.getName();
+            String copedPicKey = copeFileKey(key);
+            keyLinkedList.add(copedPicKey);
+            log.info("处理后的图片Key---{}", copedPicKey);
+            PicOperations picOperations = setPicRuleForUpload(copedPicKey, PIC_RULE);
+            // raise upload picture request
+            raisePutObjectRequest(picOperations, cosClient, key, imgFile);
+        });
+        log.info("keyList---{}", keyLinkedList);
+        cosClient.shutdown();
+        // 返回生成的文件名（包括后缀）
+        return keyLinkedList;
+    }
+
+    /**
+     * raise put object request
+     *
+     * @param picOperations
+     * @param cosClient
+     * @param key
+     * @param imgFile
+     */
+    private void raisePutObjectRequest(PicOperations picOperations, COSClient cosClient, String key, File imgFile) {
+        PutObjectRequest putObjectRequest = new PutObjectRequest(cosConfig.getBucketName(), key, imgFile);
+        // 上传COS存储
+        putObjectRequest.setPicOperations(picOperations);
+        // 发起请求
+        PutObjectResult putObjectResult = cosClient.putObject(putObjectRequest);
+        log.info("cOSRequestResult---{}", putObjectResult.toString());
+    }
+
+    /**
+     * set picture rule
+     *
+     * @param copedPicKey
+     * @param picRule
+     */
+    private PicOperations setPicRuleForUpload(String copedPicKey, String picRule) {
         // 新建图片操作类
         PicOperations picOperations = new PicOperations();
         // 是否返回原图信息
         picOperations.setIsPicInfo(1);
         // 操作规则类
         PicOperations.Rule rule = new PicOperations.Rule();
+        List<PicOperations.Rule> ruleList = new LinkedList<>();
         // 图片裁剪，并限制大小
-        rule.setRule("imageMogr2/scrop/720x1280/size-limit/1m!");
+        rule.setRule(PIC_RULE);
         rule.setBucket(cosConfig.getBucketName());
-        imgFileList.forEach(imgFile -> {
-            List<PicOperations.Rule> ruleList = new LinkedList<>();
-            String key = imgFile.getName();
-            // 获取文件前缀名
-            String prefix = FileNameUtil.getPrefix(key);
-            // 获取文件后缀名
-            String suffix = FileNameUtil.getSuffix(key);
-            // 处理后的图片名称（Key），也是实际使用的url中的文件名
-            String copedPicKey = prefix + "-cope" + "." + suffix;
-            log.info("处理后的图片Key---{}", copedPicKey);
-            PutObjectRequest putObjectRequest = new PutObjectRequest(cosConfig.getBucketName(), key, imgFile);
-            rule.setFileId(copedPicKey);
-            // 添加规则列表
-            ruleList.add(rule);
-            picOperations.setRules(ruleList);
-            // 上传COS存储
-            putObjectRequest.setPicOperations(picOperations);
-            // 发起请求
-            PutObjectResult putObjectResult = cosClient.putObject(putObjectRequest);
-            keyLinkedList.add(copedPicKey);
-            log.info("cOSRequestResult---{}", putObjectResult.toString());
-        });
-        log.info("keyList---{}", keyLinkedList);
-        cosClient.shutdown();
-        // 返回生成的文件名（包括后缀）
-        return keyLinkedList;
+        rule.setFileId(copedPicKey);
+        // 添加规则列表
+        ruleList.add(rule);
+        picOperations.setRules(ruleList);
+        return picOperations;
+    }
+
+    /**
+     * cope with key
+     *
+     * @param key
+     * @return
+     */
+    private String copeFileKey(String key) {
+        // 获取文件前缀名
+        String prefix = FileNameUtil.getPrefix(key);
+        // 获取文件后缀名
+        String suffix = FileNameUtil.getSuffix(key);
+        // 处理后的图片名称（Key），也是实际使用的url中的文件名
+        return prefix + "-cope" + "." + suffix;
     }
 
     /**
