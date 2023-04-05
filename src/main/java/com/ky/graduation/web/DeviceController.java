@@ -69,9 +69,19 @@ public class DeviceController {
      *
      * @return
      */
-    @PostMapping("/belongLab")
+    @PostMapping("/belongLabName")
+    public ResultVo belongLabName(int deviceId) {
+        return deviceService.getBelongLabName(deviceId);
+    }
+
+    /**
+     * get belongs lab info
+     *
+     * @param deviceId
+     */
+    @GetMapping("/belongLab")
     public ResultVo belongLab(int deviceId) {
-        return deviceService.getBelongLab(deviceId);
+        return deviceService.belongLab(deviceId);
     }
 
 }

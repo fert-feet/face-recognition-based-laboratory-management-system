@@ -76,7 +76,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
     }
 
     @Override
-    public ResultVo getBelongLab(int deviceId) {
+    public ResultVo getBelongLabName(int deviceId) {
         String belongLab = deviceMapper.getBelongLab(deviceId);
         return ResultVo.success().data("labName", belongLab);
     }
@@ -93,7 +93,6 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         if (device.getLaboratoryName() == null || compareBindLaboratory(device)) {
             return updateDeviceInfo(device);
         }
-        LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
         // if update device belong-lab status,then delete all data in device first
         sendDeviceRequest.deleteDevicePerson(device.getPassword(), device.getIpAdress(), "-1");
         // cancel distribute lab to device
@@ -168,8 +167,9 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
      * @param device
      */
     private ResultVo cancelDistributeLab(Device device) {
-        device.setLaboratoryName(null);
-        device.setLaboratoryId(null);
+        //TODO need to change labName in device when update labName, since cancel foreign key
+        device.setLaboratoryName("N");
+        device.setLaboratoryId(0);
         if (deviceMapper.updateById(device) < 1) {
             return ResultVo.error();
         }
@@ -198,6 +198,12 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
             return ResultVo.success();
         }
         return ResultVo.error();
+    }
+
+    @Override
+    public ResultVo belongLab(int deviceId) {
+        Device device = deviceMapper.selectById(deviceId);
+        return ResultVo.success().data("selectedLabId", device.getLaboratoryId());
     }
 
     private ResultVo updateDeviceInfo(Device device) {

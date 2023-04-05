@@ -31,7 +31,7 @@ public interface IDeviceService extends IService<Device> {
      * @param deviceId
      * @return
      */
-    ResultVo getBelongLab(int deviceId);
+    ResultVo getBelongLabName(int deviceId);
 
     /**
      * 更新或新增设备
@@ -48,4 +48,12 @@ public interface IDeviceService extends IService<Device> {
      * @return
      */
     ResultVo deleteDevice(int id);
+
+    /**
+     * find belongs lab info
+     *
+     * @param deviceId
+     * @return
+     */
+    ResultVo belongLab(int deviceId);
 }

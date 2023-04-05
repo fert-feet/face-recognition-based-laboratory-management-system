@@ -1,8 +1,6 @@
 package com.ky.graduation.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Getter;
 import lombok.Setter;
@@ -47,12 +45,10 @@ public class Device implements Serializable {
     /**
      * 所属部门名称
      */
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String laboratoryName;
 
     /**
      * 所属部门id
      */
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private Integer laboratoryId;
 }
