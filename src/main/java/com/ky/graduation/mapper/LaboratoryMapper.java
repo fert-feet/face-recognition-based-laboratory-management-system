@@ -32,4 +32,11 @@ public interface LaboratoryMapper extends BaseMapper<Laboratory> {
      * @return
      */
     List<String> listLabsName();
+
+    /**
+     * 查找授权给人员的实验室id
+     *
+     * @param id
+     */
+    List<Integer> findAuthenticatedLabIds(@Param(value = "personId") int id);
 }

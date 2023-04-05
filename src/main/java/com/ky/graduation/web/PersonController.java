@@ -74,6 +74,17 @@ public class PersonController {
     }
 
     /**
+     * 查询已授权给该人员的实验室 ID
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/authenticatedLabIds")
+    public ResultVo authenticatedLabId(@RequestParam(name = "personId") int id) {
+        return personService.findAuthenticatedLabIds(id);
+    }
+
+    /**
      * 新增多个实验室对人员的许可
      *
      * @param authenticateVo

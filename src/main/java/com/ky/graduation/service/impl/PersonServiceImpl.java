@@ -220,7 +220,7 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
     private boolean deleteLabDistributedToPerson(AuthenticateLabToPersonVO authenticateVO) {
         LambdaQueryWrapper<PersonLaboratory> wrapper = Wrappers.lambdaQuery();
         wrapper.eq(PersonLaboratory::getPId, authenticateVO.getPersonId());
-        return personLaboratoryMapper.delete(wrapper) >= 1;
+        return personLaboratoryMapper.delete(wrapper) >= 0;
     }
 
     /**
@@ -299,6 +299,12 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
             return ResultVo.success();
         }
         return ResultVo.error();
+    }
+
+    @Override
+    public ResultVo findAuthenticatedLabIds(int id) {
+        List<Integer> authenticatedLabIds = laboratoryMapper.findAuthenticatedLabIds(id);
+        return ResultVo.success().data("authenticatedLabIds", authenticatedLabIds);
     }
 
 }

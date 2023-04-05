@@ -14,4 +14,9 @@
         SELECT `name`
         FROM laboratory
     </select>
+    <select id="findAuthenticatedLabIds" resultType="java.lang.Integer">
+        SELECT lab_id
+        FROM person_laboratory
+        WHERE p_id = #{personId}
+    </select>
 </mapper>

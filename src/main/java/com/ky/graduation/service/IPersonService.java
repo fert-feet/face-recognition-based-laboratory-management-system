@@ -57,4 +57,12 @@ public interface IPersonService extends IService<Person> {
      * @return
      */
     ResultVo deletePerson(int id);
+
+    /**
+     * 查询已授权给该人员的实验室 id
+     *
+     * @param id
+     * @return
+     */
+    ResultVo findAuthenticatedLabIds(int id);
 }
