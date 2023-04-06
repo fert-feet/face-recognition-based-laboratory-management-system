@@ -3,7 +3,6 @@ package com.ky.graduation.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ky.graduation.device.RequestResult;
 import com.ky.graduation.entity.Device;
 import com.ky.graduation.entity.Face;
 import com.ky.graduation.entity.Person;
@@ -20,7 +19,6 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -88,7 +86,10 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
         // upload face to device
         uploadFaceToDevice(keyList, personId);
         // 将是否设置人脸变为已设置
-        return changePersonPhotosStatus(personId, (byte) 1);
+        if (!changePersonPhotosStatus(personId, (byte) 1)) {
+            return ResultVo.error();
+        }
+        return ResultVo.success();
     }
 
     /**
@@ -98,14 +99,11 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
      * @param setPhotosStatus
      * @return
      */
-    private ResultVo changePersonPhotosStatus(int personId, byte setPhotosStatus) {
+    private boolean changePersonPhotosStatus(int personId, byte setPhotosStatus) {
         Person person = new Person();
         person.setId(personId);
         person.setIsSetFace(setPhotosStatus);
-        if (personMapper.updateById(person) < 1) {
-            return ResultVo.error();
-        }
-        return ResultVo.success();
+        return personMapper.updateById(person) >= 1;
     }
 
     /**
@@ -179,30 +177,41 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
         // 删除每个设备中这个人的此张相片
         LinkedList<Device> deviceList = personMapper.findDeviceListContainPerson(personId);
         if (deviceList.size() > 0) {
-            LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
-            deviceList.forEach(device -> {
-                multiValueMap.set("pass", device.getPassword());
-                multiValueMap.set("faceId", faceId);
-                // 请求设备删除人脸
-                RequestResult deleteFaceRequest = sendDeviceRequest.sendPostRequest(device.getIpAddress(), deleteFaceUrl, multiValueMap);
-                log.info("deleteFaceRequest---{}", deleteFaceRequest);
-            });
+            raiseDeleteFaceReqToDB(deviceList, face);
         }
         if (faceMapper.deleteById(faceId) < 1) {
             return ResultVo.error();
         }
         // 若该人员已经没有人脸，则改变人脸设置状态
-        LambdaQueryWrapper<Face> wrapper = Wrappers.lambdaQuery();
-        wrapper.eq(Face::getPersonId, personId);
-        List<Face> faceList = faceMapper.selectList(wrapper);
-        if (faceList.size() == 0) {
-            Person person = new Person();
-            person.setId(personId);
-            person.setIsSetFace((byte) 0);
-            personMapper.updateById(person);
+        if (checkPersonFaceStatus(personId)) {
+            changePersonPhotosStatus(personId, (byte) 0);
         }
         // 根据key删除云端照片
         cosRequest.deleteObject(face.getName());
         return ResultVo.success();
+    }
+
+    /**
+     * check if person still has face photos
+     *
+     * @param personId
+     * @return
+     */
+    private boolean checkPersonFaceStatus(int personId) {
+        LambdaQueryWrapper<Face> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(Face::getPersonId, personId);
+        return faceMapper.selectList(wrapper).size() == 0;
+    }
+
+    /**
+     * raise delete person face request
+     *
+     * @param deviceList
+     * @param face
+     */
+    private void raiseDeleteFaceReqToDB(LinkedList<Device> deviceList, Face face) {
+        deviceList.forEach(device -> {
+            sendDeviceRequest.deleteDevicePersonFace(device.getPassword(), device.getIpAddress(), face.getFaceId().toString());
+        });
     }
 }

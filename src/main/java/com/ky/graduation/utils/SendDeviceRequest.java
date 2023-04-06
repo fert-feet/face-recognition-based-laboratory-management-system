@@ -40,6 +40,13 @@ public class SendDeviceRequest {
     @Value("${deviceOption.isOpenDevice}")
     private boolean isOpenDevice;
 
+    @Value("${requestUrl.face.deleteFace}")
+    private String deleteFaceUrl;
+
+    @Value("${requestUrl.person.updatePerson}")
+    private String updatePersonUrl;
+
+
     /**
      * 发送get请求（有参数）
      *
@@ -140,12 +147,12 @@ public class SendDeviceRequest {
     }
 
     /**
-     * create person in device
+     * create or update person in device
      *
      * @param devicePassword
      * @param deviceIpAddress
      */
-    public void createDevicePerson(String devicePassword, String deviceIpAddress, Person person) {
+    public void createOrUpdateDevicePerson(String devicePassword, String deviceIpAddress, Person person, boolean updateFlag) {
         LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
         multiValueMap.set("pass", devicePassword);
         JSONObject personJson = new JSONObject();
@@ -154,10 +161,24 @@ public class SendDeviceRequest {
         personJson.set("iDNumber", person.getIdNumber());
         personJson.set("password", "123456");
         multiValueMap.set("person", personJson);
-        RequestResult createPersonRequest = this.sendPostRequest(deviceIpAddress, createPersonUrl, multiValueMap);
-        log.info("createPersonRequest---{}", createPersonRequest.getMsg());
+        // check if update request
+        if (updateFlag) {
+            RequestResult updatePersonRequest = this.sendPostRequest(deviceIpAddress, updatePersonUrl, multiValueMap);
+            log.info("updatePersonRequest---{}", updatePersonRequest.getMsg());
+        } else {
+            RequestResult createPersonRequest = this.sendPostRequest(deviceIpAddress, createPersonUrl, multiValueMap);
+            log.info("createPersonRequest---{}", createPersonRequest.getMsg());
+        }
     }
 
+    /**
+     * create person face photos in device
+     *
+     * @param devicePassword
+     * @param deviceIpAddress
+     * @param face
+     * @param person
+     */
     public void createDevicePersonFace(String devicePassword, String deviceIpAddress, Face face, Person person) {
         LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
         multiValueMap.set("pass", devicePassword);
@@ -167,5 +188,21 @@ public class SendDeviceRequest {
         RequestResult requestResult = this.sendPostRequest(deviceIpAddress, createFaceUrl, multiValueMap);
         log.info("createPersonFaceRequest---{}", requestResult.getMsg());
     }
+
+    /**
+     * delete person face photos in device
+     *
+     * @param devicePassword
+     * @param deviceIpAddress
+     * @param faceId
+     */
+    public void deleteDevicePersonFace(String devicePassword, String deviceIpAddress, String faceId) {
+        LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
+        multiValueMap.set("pass", devicePassword);
+        multiValueMap.set("faceId", faceId);
+        RequestResult requestResult = this.sendPostRequest(deviceIpAddress, deleteFaceUrl, multiValueMap);
+        log.info("deletePersonFaceRequest---{}", requestResult.getMsg());
+    }
+
 
 }

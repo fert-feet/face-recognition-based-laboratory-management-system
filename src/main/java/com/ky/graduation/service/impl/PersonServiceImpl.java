@@ -1,6 +1,5 @@
 package com.ky.graduation.service.impl;
 
-import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -155,7 +154,7 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
     private void deviceAppendPerson(List<Device> devices, List<Face> faces, Person person) {
         devices.forEach(device -> {
             // append person into device
-            sendDeviceRequest.createDevicePerson(device.getPassword(), device.getIpAddress(), person);
+            sendDeviceRequest.createOrUpdateDevicePerson(device.getPassword(), device.getIpAddress(), person, false);
             // 遍历人脸照片列表，添加到每个人脸机，双重循环不可避免
             appendPersonPhotosIntoDevice(device, faces, person);
         });
@@ -247,27 +246,38 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
         // 若已经写入人脸机中，则需要请求人脸机进行修改
         if (person.getIsDistributed() == 1) {
             // 查找人员所在的各设备
-            List<Device> deviceList = personMapper.findDeviceListContainPerson(person.getId());
-            LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
-            // 循环请求请求人脸机进行更新
-            deviceList.forEach(device -> {
-                JSONObject personJson = new JSONObject();
-                personJson.set("id", person.getId().toString());
-                personJson.set("name", person.getName());
-                // 暂时写死，只允许6位，后续改写
-                personJson.set("password", "132456");
-                personJson.set("iDNumber", person.getIdNumber());
-                multiValueMap.set("person", personJson);
-                multiValueMap.set("pass", device.getPassword());
-                // 发起请求
-                RequestResult requestResult = sendDeviceRequest.sendPostRequest(device.getIpAddress(), updatePersonUrl, multiValueMap);
-                log.info("requestResult---{}", requestResult.getMsg());
-            });
+            updatePeronInDevice(person);
         }
         // 设置默认密码
         person.setPassword(person.getIdNumber());
-        personMapper.updateById(person);
+        if (personMapper.updateById(person) < 1) {
+            return ResultVo.error();
+        }
         return ResultVo.success();
+    }
+
+    /**
+     * raise update person request
+     *
+     * @param person
+     */
+    private void updatePeronInDevice(Person person) {
+        // find all device that contain this person
+        List<Device> deviceList = personMapper.findDeviceListContainPerson(person.getId());
+        raiseUpdatePersonRequest(person, deviceList);
+    }
+
+    /**
+     * raise update person info in device
+     *
+     * @param person
+     * @param deviceList
+     */
+    private void raiseUpdatePersonRequest(Person person, List<Device> deviceList) {
+        // 循环请求请求人脸机进行更新
+        deviceList.forEach(device -> {
+            sendDeviceRequest.createOrUpdateDevicePerson(device.getPassword(), device.getIpAddress(), person, true);
+        });
     }
 
     @Override

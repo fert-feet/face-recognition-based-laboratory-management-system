@@ -136,7 +136,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         LinkedList<Person> authenticatedPersonList = laboratoryMapper.findAuthenticatedPerson(device.getLaboratoryId());
         // create person id and photos in device
         authenticatedPersonList.forEach(person -> {
-            sendDeviceRequest.createDevicePerson(device.getPassword(), device.getIpAddress(), person);
+            sendDeviceRequest.createOrUpdateDevicePerson(device.getPassword(), device.getIpAddress(), person, false);
             // fetch person all face photos and send to device to create
             List<Face> faceList = findAllPersonPhotos(person);
             // send create face request to device
