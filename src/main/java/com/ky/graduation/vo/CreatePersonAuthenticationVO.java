@@ -10,8 +10,13 @@ import lombok.Data;
 
 @Data
 public class CreatePersonAuthenticationVO {
+
+    Integer personId;
+
     Integer labId;
+
     String personName;
+
     String idNumber;
 
 }

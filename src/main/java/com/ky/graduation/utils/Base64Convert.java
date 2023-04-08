@@ -2,6 +2,7 @@ package com.ky.graduation.utils;
 
 import com.qcloud.cos.utils.IOUtils;
 import org.apache.commons.codec.binary.Base64;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
 import java.io.File;
@@ -13,6 +14,7 @@ import java.io.IOException;
  * @描述: convert image into base64
  **/
 
+@Component
 public class Base64Convert {
 
     public static String convertToBase64() throws IOException {
@@ -26,9 +28,5 @@ public class Base64Convert {
         //关闭IO流
         fileInputStream.close();
         return encodeBase64;
-    }
-
-    public static void main(String[] args) throws IOException {
-        System.out.println(convertToBase64());
     }
 }

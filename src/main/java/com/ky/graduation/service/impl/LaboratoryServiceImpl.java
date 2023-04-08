@@ -13,7 +13,6 @@ import com.ky.graduation.mapper.DeviceMapper;
 import com.ky.graduation.mapper.LaboratoryMapper;
 import com.ky.graduation.mapper.PersonLaboratoryMapper;
 import com.ky.graduation.mapper.PersonMapper;
-import com.ky.graduation.result.ResultCode;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.ILaboratoryService;
 import com.ky.graduation.vo.CreatePersonAuthenticationVO;
@@ -90,48 +89,86 @@ public class LaboratoryServiceImpl extends ServiceImpl<LaboratoryMapper, Laborat
 
     @Override
     public ResultVo cancelAuthentication(PersonLaboratory personLaboratory) {
-        // 邪乎，pId驼峰传不进来，需要pid才能传，我也不知道为什么
-        LambdaQueryWrapper<PersonLaboratory> wrapper = Wrappers.lambdaQuery();
-        wrapper.eq(PersonLaboratory::getPId, personLaboratory.getPId());
-        // 首先查询人员已授权的实验室个数
-        List<PersonLaboratory> personLaboratoryList = personLaboratoryMapper.selectList(wrapper);
-        wrapper.eq(PersonLaboratory::getLabId, personLaboratory.getLabId());
-        int deleteNum = personLaboratoryMapper.delete(wrapper);
+        // find person that authorized by lab
+        List<PersonLaboratory> personLaboratoryList = fetchPersonLabList(personLaboratory);
+        int deleteNum = deletePersonLabRelationship(personLaboratory);
+
+        // check if deleted labs was the last lab that authorize to person
+        // if not, then just return
         if (deleteNum > 0 && personLaboratoryList.size() > deleteNum) {
             return ResultVo.success();
         }
-        // 若删除的授权实验室人员授权关系为最后一个授权关系，则将人员实验室状态变为未分配
+
+        // yes, then change person distributed status
         if (deleteNum > 0 && personLaboratoryList.size() == deleteNum) {
-            Person person = new Person();
-            person.setId(personLaboratory.getPId());
-            person.setIsDistributed((byte) 0);
-            personMapper.updateById(person);
-            return ResultVo.success();
+            if (changePersonDistributedStatus(personLaboratory.getPId(), false)) {
+                return ResultVo.success();
+            }
         }
         return ResultVo.error();
     }
 
+    private boolean changePersonDistributedStatus(Integer pId, boolean distributedStatus) {
+        Person person = new Person();
+        person.setId(pId);
+
+        // set person distributed status
+        person.setIsDistributed((byte) 0);
+        if (distributedStatus) {
+            person.setIsDistributed((byte) 1);
+        }
+
+        return personMapper.updateById(person) >= 1;
+    }
+
+    /**
+     * delete the relationship of person and lab
+     *
+     * @param personLaboratory
+     * @return
+     */
+    private int deletePersonLabRelationship(PersonLaboratory personLaboratory) {
+        LambdaQueryWrapper<PersonLaboratory> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(PersonLaboratory::getPId, personLaboratory.getPId());
+        wrapper.eq(PersonLaboratory::getLabId, personLaboratory.getLabId());
+
+        return personLaboratoryMapper.delete(wrapper);
+    }
+
+    /**
+     * find person that authorized by lab
+     *
+     * @param personLaboratory
+     * @return
+     */
+    private List<PersonLaboratory> fetchPersonLabList(PersonLaboratory personLaboratory) {
+        LambdaQueryWrapper<PersonLaboratory> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(PersonLaboratory::getPId, personLaboratory.getPId());
+        return personLaboratoryMapper.selectList(wrapper);
+    }
+
     @Override
     public ResultVo createAuthentication(CreatePersonAuthenticationVO createVo) {
-        LambdaQueryWrapper<Person> wrapper = Wrappers.lambdaQuery();
-        // 根据人名和身份证号查询是否存在该人员，并取其id
-        wrapper.eq(Person::getName, createVo.getPersonName()).eq(Person::getIdNumber, createVo.getIdNumber());
-        Person person = personMapper.selectOne(wrapper);
-        if (person == null) {
-            return ResultVo.error().status(ResultCode.EMPTY_QUERY);
+        // change person distributed status and create new relationship between person and lab
+        if (!(changePersonDistributedStatus(createVo.getPersonId(), true) && createPersonLabRelationShip(createVo.getPersonId(), createVo.getLabId()))) {
+            return ResultVo.error();
         }
-        // 将人员实验室状态变为已分配
-        person.setIsDistributed((byte) 1);
-        personMapper.updateById(person);
-        // 根据人员id和实验室id进行新增操作
+        return ResultVo.success();
+    }
+
+    /**
+     * create new relationship of person and lab
+     *
+     * @param personId
+     * @param labId
+     */
+    private boolean createPersonLabRelationShip(Integer personId, Integer labId) {
         PersonLaboratory personLaboratory = new PersonLaboratory();
-        personLaboratory.setPId(person.getId());
-        personLaboratory.setLabId(createVo.getLabId());
-        int insert = personLaboratoryMapper.insert(personLaboratory);
-        if (insert > 0) {
-            return ResultVo.success();
-        }
-        return ResultVo.error();
+
+        personLaboratory.setPId(personId);
+        personLaboratory.setLabId(labId);
+
+        return personLaboratoryMapper.insert(personLaboratory) >= 1;
     }
 
 
