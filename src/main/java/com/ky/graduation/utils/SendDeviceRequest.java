@@ -156,7 +156,7 @@ public class SendDeviceRequest {
         LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
         multiValueMap.set("pass", devicePassword);
         JSONObject personJson = new JSONObject();
-        personJson.set("id", person.getId().toString());
+        personJson.set("id", String.valueOf(person.getId()));
         personJson.set("name", person.getName());
         personJson.set("iDNumber", person.getIdNumber());
         personJson.set("password", "123456");
@@ -182,8 +182,8 @@ public class SendDeviceRequest {
     public void createDevicePersonFace(String devicePassword, String deviceIpAddress, Face face, Person person) {
         LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
         multiValueMap.set("pass", devicePassword);
-        multiValueMap.set("personId", person.getId());
-        multiValueMap.set("faceId", face.getFaceId());
+        multiValueMap.set("personId", String.valueOf(person.getId()));
+        multiValueMap.set("faceId", String.valueOf(face.getFaceId()));
         multiValueMap.set("url", face.getUrl());
         RequestResult requestResult = this.sendPostRequest(deviceIpAddress, createFaceUrl, multiValueMap);
         log.info("createPersonFaceRequest---{}", requestResult.getMsg());

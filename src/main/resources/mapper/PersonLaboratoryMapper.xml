@@ -10,4 +10,9 @@
                                   WHERE laboratory.id IN
                                         (SELECT lab_id FROM person_laboratory WHERE p_id = #{personId}))
     </select>
+    <select id="findFacesOfPerson" resultType="com.ky.graduation.entity.Face">
+        SELECT *
+        FROM face
+        WHERE person_id = #{personId}
+    </select>
 </mapper>

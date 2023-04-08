@@ -140,7 +140,7 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
         // 查询该人员信息
         Person person = personMapper.selectById(authenticateVO.getPersonId());
         // 查询人员照片
-        List<Face> faces = findFacesOfPerson(authenticateVO.getPersonId());
+        List<Face> faces = personMapper.findFacesOfPerson(authenticateVO.getPersonId());
         deviceAppendPerson(devices, faces, person);
     }
 

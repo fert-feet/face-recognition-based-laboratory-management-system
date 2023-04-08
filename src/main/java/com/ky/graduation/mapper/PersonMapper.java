@@ -2,9 +2,11 @@ package com.ky.graduation.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ky.graduation.entity.Device;
+import com.ky.graduation.entity.Face;
 import com.ky.graduation.entity.Person;
 
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * <p>
@@ -23,4 +25,12 @@ public interface PersonMapper extends BaseMapper<Person> {
      * @return
      */
     LinkedList<Device> findDeviceListContainPerson(Integer personId);
+
+    /**
+     * find all photos info of person
+     *
+     * @param personId
+     * @return
+     */
+    List<Face> findFacesOfPerson(Integer personId);
 }

@@ -5,16 +5,14 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ky.graduation.entity.Device;
-import com.ky.graduation.entity.Laboratory;
-import com.ky.graduation.entity.Person;
-import com.ky.graduation.entity.PersonLaboratory;
+import com.ky.graduation.entity.*;
 import com.ky.graduation.mapper.DeviceMapper;
 import com.ky.graduation.mapper.LaboratoryMapper;
 import com.ky.graduation.mapper.PersonLaboratoryMapper;
 import com.ky.graduation.mapper.PersonMapper;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.ILaboratoryService;
+import com.ky.graduation.utils.SendDeviceRequest;
 import com.ky.graduation.vo.CreatePersonAuthenticationVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +45,9 @@ public class LaboratoryServiceImpl extends ServiceImpl<LaboratoryMapper, Laborat
     private PersonLaboratoryMapper personLaboratoryMapper;
     @Resource
     private DeviceMapper deviceMapper;
+
+    @Resource
+    private SendDeviceRequest sendDeviceRequest;
 
     @Override
     public ResultVo listLab(long page, long limit, String name, String sort) {
@@ -105,7 +106,23 @@ public class LaboratoryServiceImpl extends ServiceImpl<LaboratoryMapper, Laborat
                 return ResultVo.success();
             }
         }
+
+        // delete person in device belongs to lab
+        raiseDeletePersonReqInDevice(personLaboratory.getPId(), personLaboratory.getLabId());
         return ResultVo.error();
+    }
+
+    /**
+     * raise device delete person request
+     *
+     * @param pId
+     * @param labId
+     */
+    private void raiseDeletePersonReqInDevice(Integer pId, Integer labId) {
+        List<Device> deviceList = findBindDeviceList(labId);
+        deviceList.forEach(device -> {
+            sendDeviceRequest.deleteDevicePerson(device.getPassword(), device.getIpAddress(), String.valueOf(pId));
+        });
     }
 
     private boolean changePersonDistributedStatus(Integer pId, boolean distributedStatus) {
@@ -153,7 +170,52 @@ public class LaboratoryServiceImpl extends ServiceImpl<LaboratoryMapper, Laborat
         if (!(changePersonDistributedStatus(createVo.getPersonId(), true) && createPersonLabRelationShip(createVo.getPersonId(), createVo.getLabId()))) {
             return ResultVo.error();
         }
+        List<Device> deviceList = findBindDeviceList(createVo.getLabId());
+        raiseCreatePersonReqInDevice(deviceList, createVo.getPersonId());
         return ResultVo.success();
+    }
+
+    /**
+     * raise device request to create person information in device
+     *
+     * @param deviceList
+     * @param personId
+     */
+    private void raiseCreatePersonReqInDevice(List<Device> deviceList, Integer personId) {
+        Person person = personMapper.selectById(personId);
+        List<Face> faces = personMapper.findFacesOfPerson(personId);
+
+        deviceList.forEach(device -> {
+            sendDeviceRequest.createOrUpdateDevicePerson(device.getPassword(), device.getIpAddress(), person, false);
+            // append face photos of person into device meanwhile
+            appendPersonPhotosIntoDevice(device, faces, person);
+        });
+    }
+
+    /**
+     * append photos into device
+     *
+     * @param device
+     * @param faces
+     * @param person
+     */
+    private void appendPersonPhotosIntoDevice(Device device, List<Face> faces, Person person) {
+        faces.forEach(face -> {
+            // raise append photos request to device
+            sendDeviceRequest.createDevicePersonFace(device.getPassword(), device.getIpAddress(), face, person);
+        });
+    }
+
+    /**
+     * find devices belongs to lab
+     *
+     * @param labId
+     * @return
+     */
+    private List<Device> findBindDeviceList(Integer labId) {
+        LambdaQueryWrapper<Device> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(Device::getLaboratoryId, labId);
+        return deviceMapper.selectList(wrapper);
     }
 
     /**
