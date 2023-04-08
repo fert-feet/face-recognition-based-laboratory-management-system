@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ky.graduation.device.RequestResult;
 import com.ky.graduation.entity.*;
 import com.ky.graduation.mapper.*;
 import com.ky.graduation.result.ResultVo;
@@ -281,34 +280,46 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
     }
 
     @Override
-    public ResultVo deletePerson(int id) {
-        // 查询人员是否存在于设备中
-        LinkedList<Device> deviceList = personMapper.findDeviceListContainPerson(id);
-        //若存在，则删除设备中此人员以及照片
-        if (deviceList.size() > 0) {
-            deviceList.forEach(device -> {
-                LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
-                multiValueMap.set("pass", device.getPassword());
-                multiValueMap.set("id", id);
-                RequestResult deletePersonRequest = sendDeviceRequest.sendPostRequest(device.getIpAddress(), deletePersonUrl, multiValueMap);
-                log.info("deletePersonRequest---{}", deletePersonRequest.getMsg());
-            });
-        }
-        // 若不存在设备中，则在云端删除照片
-        LambdaQueryWrapper<Face> faceWrapper = Wrappers.lambdaQuery();
-        faceWrapper.eq(Face::getPersonId, id);
-        List<Face> faceList = faceMapper.selectList(faceWrapper);
-        // 若有人脸信息，循环向云端发起删除请求
-        if (faceList.size() > 0) {
-            faceList.forEach(face -> {
-                cosRequest.deleteObject(face.getName());
-            });
-        }
+    public ResultVo deletePerson(int personId) {
+        // delete person in device
+        raiseDeletePersonReqInDevice(personId);
+
+        // delete person photos in cos
+        raiseDeletePersonReqInCOS(personId);
+
         // 操作数据库，级联删除，实验室授权关系与人员照片
-        if (personMapper.deleteById(id) > 0) {
-            return ResultVo.success();
+        if (personMapper.deleteById(personId) < 1) {
+            return ResultVo.error();
         }
-        return ResultVo.error();
+        return ResultVo.success();
+    }
+
+    /**
+     * delete person photos that store in cos
+     *
+     * @param personId
+     */
+    private void raiseDeletePersonReqInCOS(int personId) {
+        LambdaQueryWrapper<Face> faceWrapper = Wrappers.lambdaQuery();
+        faceWrapper.eq(Face::getPersonId, personId);
+        List<Face> faceList = faceMapper.selectList(faceWrapper);
+
+        // 若有人脸信息，循环向云端发起删除请求
+        faceList.forEach(face -> {
+            cosRequest.deleteObject(face.getName());
+        });
+    }
+
+    /**
+     * raise device delete person request
+     *
+     * @param pId
+     */
+    private void raiseDeletePersonReqInDevice(Integer pId) {
+        LinkedList<Device> deviceList = personMapper.findDeviceListContainPerson(pId);
+        deviceList.forEach(device -> {
+            sendDeviceRequest.deleteDevicePerson(device.getPassword(), device.getIpAddress(), String.valueOf(pId));
+        });
     }
 
     @Override
