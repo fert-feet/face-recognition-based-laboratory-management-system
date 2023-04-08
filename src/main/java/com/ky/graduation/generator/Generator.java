@@ -13,7 +13,7 @@ import java.util.Collections;
  **/
 
 public class Generator {
-    public static final String URL = "jdbc:mysql://localhost:3306/aquarium?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai";
+    public static final String URL = "jdbc:mysql://localhost:3306/ky_graduate?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai";
     public static final String USER_NAME = "root";
     public static final String PASS_WORD = "lwz7254591";
     public static final String AUTHOR = "tt-Tang";
@@ -33,7 +33,7 @@ public class Generator {
                 })
                 .strategyConfig(builder -> {
                     // 设置需要生成的表名
-                    builder.addInclude("sys_water_quality")
+                    builder.addInclude("face")
                             .entityBuilder()
                             //开启Lombok
                             .enableLombok()
