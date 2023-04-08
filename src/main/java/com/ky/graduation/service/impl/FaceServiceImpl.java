@@ -12,6 +12,7 @@ import com.ky.graduation.result.ResultCode;
 import com.ky.graduation.result.ResultVo;
 import com.ky.graduation.service.IFaceService;
 import com.ky.graduation.utils.CosRequest;
+import com.ky.graduation.utils.FaceImgLocalStoreUtil;
 import com.ky.graduation.utils.SendDeviceRequest;
 import com.ky.graduation.vo.CosConfig;
 import com.ky.graduation.vo.WeChatLoginVO;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>
@@ -42,6 +44,9 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
 
     @Resource
     private CosRequest cosRequest;
+
+    @Resource
+    private FaceImgLocalStoreUtil localStore;
 
     @Resource
     private PersonMapper personMapper;
@@ -81,8 +86,9 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
 
     @Override
     public ResultVo faceUpload(List<MultipartFile> imgList, int personId) throws IOException {
+        List<MultipartFile> imgFileList = Optional.ofNullable(imgList).orElse(List.of());
         // 上传COS存储
-        LinkedList<String> keyList = cosRequest.putObject(imgList);
+        LinkedList<String> keyList = cosRequest.putObject(imgFileList);
         // upload face to device
         uploadFaceToDevice(keyList, personId);
         // 将是否设置人脸变为已设置
