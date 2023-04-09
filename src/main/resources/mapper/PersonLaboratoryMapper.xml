@@ -4,11 +4,10 @@
 
     <select id="findDeviceListContainPerson" resultType="com.ky.graduation.entity.Device">
         SELECT *
-        FROM device
-        WHERE laboratory_name IN (SELECT laboratory_name
-                                  FROM laboratory
-                                  WHERE laboratory.id IN
-                                        (SELECT lab_id FROM person_laboratory WHERE p_id = #{personId}))
+        FROM device d
+                 INNER JOIN laboratory l ON d.laboratory_id = l.id
+                 INNER JOIN person_laboratory pl ON l.id = pl.lab_id
+        WHERE pl.p_id = #{personId}
     </select>
     <select id="findFacesOfPerson" resultType="com.ky.graduation.entity.Face">
         SELECT *

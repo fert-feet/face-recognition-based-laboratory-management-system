@@ -35,7 +35,7 @@ public class Face implements Serializable {
     /**
      * 人脸照片二进制流编码
      */
-    private byte[] imgEncode;
+    private String imgEncode;
 
     /**
      * 是否不严格检测照片质量	false（默认）：严格	true：不严格

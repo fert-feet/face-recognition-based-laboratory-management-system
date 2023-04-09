@@ -12,7 +12,6 @@ import com.qcloud.cos.model.ciModel.persistence.PicOperations;
 import com.qcloud.cos.region.Region;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,9 +33,6 @@ public class CosRequest {
     public static final String PIC_RULE = "imageMogr2/scrop/720x1280/size-limit/1m!";
     @Resource
     private CosConfig cosConfig;
-
-    @Value("${pictureUploadOption.isEnableUploadToCOS}")
-    private boolean isEnableUploadToCOS;
 
     /**
      * 将图片前缀进行替换

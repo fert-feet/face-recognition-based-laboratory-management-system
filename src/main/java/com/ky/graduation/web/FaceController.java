@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -47,7 +48,7 @@ public class FaceController {
      * @throws IOException
      */
     @PostMapping("/upload")
-    public ResultVo faceUpload(List<MultipartFile> imgList, int personId) throws IOException {
+    public ResultVo faceUpload(List<MultipartFile> imgList, int personId) throws IOException, SQLException {
         return faceService.faceUpload(imgList, personId);
     }
 

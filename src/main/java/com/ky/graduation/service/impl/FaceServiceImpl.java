@@ -3,6 +3,7 @@ package com.ky.graduation.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ky.graduation.dto.FaceImgLocalStoreDTO;
 import com.ky.graduation.entity.Device;
 import com.ky.graduation.entity.Face;
 import com.ky.graduation.entity.Person;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -45,8 +47,7 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
     @Resource
     private CosRequest cosRequest;
 
-    @Resource
-    private FaceImgLocalStoreUtil localStore;
+    public static final String COS = "COS";
 
     @Resource
     private PersonMapper personMapper;
@@ -56,12 +57,11 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
 
     @Resource
     private SendDeviceRequest sendDeviceRequest;
-
-    @Value("${requestUrl.face.createFace}")
-    private String createFaceUrl;
-
-    @Value("${requestUrl.face.deleteFace}")
-    private String deleteFaceUrl;
+    public static final String LOCAL = "LOCAL";
+    @Resource
+    private FaceImgLocalStoreUtil storeUtil;
+    @Value("${pictureUploadOption.faceImgStoreMode}")
+    private String storeMode;
 
     @Override
     public ResultVo login(WeChatLoginVO weChatLoginVO) {
@@ -85,8 +85,74 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
     }
 
     @Override
-    public ResultVo faceUpload(List<MultipartFile> imgList, int personId) throws IOException {
+    public ResultVo faceUpload(List<MultipartFile> imgList, int personId) throws IOException, SQLException {
         List<MultipartFile> imgFileList = Optional.ofNullable(imgList).orElse(List.of());
+
+        // change upload way when upload-flag change, default upload mode is local
+        if (COS.equals(storeMode)) {
+            return uploadFaceInCOSMode(imgFileList, personId);
+        }
+        return uploadFaceInLocalMode(imgFileList, personId);
+    }
+
+    /**
+     * upload face image in local way, that store face photos
+     *
+     * @param imgFileList
+     * @param personId
+     * @return
+     */
+    private ResultVo uploadFaceInLocalMode(List<MultipartFile> imgFileList, int personId) throws IOException, SQLException {
+        // TODO need to complete local mode
+        return ResultVo.success();
+    }
+
+    /**
+     * store face image in db and device
+     *
+     * @param faceLocalStoreDTO
+     * @param personId
+     */
+    private void storeFaceImg(FaceImgLocalStoreDTO faceLocalStoreDTO, int personId) throws SQLException {
+    }
+
+    /**
+     * store face photos base64 encode into device
+     *
+     * @param personId
+     * @param imgBase64EncodeList
+     */
+    private void storeFaceImgInDevice(int personId, List<String> imgBase64EncodeList) {
+        for (String imgEncode : imgBase64EncodeList) {
+        }
+    }
+
+    /**
+     * store img bytes in local db with longBlob type
+     *
+     * @param personId
+     * @param imgByteEncodeList
+     */
+    private boolean storeFaceImgInDB(int personId, List<byte[]> imgByteEncodeList) throws SQLException {
+        for (byte[] imgBytes : imgByteEncodeList) {
+            Face face = new Face();
+            face.setPersonId(personId);
+
+            // insert into db
+            if (faceMapper.insert(face) != 1) {
+                throw new SQLException("face insert error!");
+            }
+        }
+        return true;
+    }
+
+    /**
+     * upload face in COS way, that send face image to cos server
+     *
+     * @param imgFileList
+     * @param personId
+     */
+    private ResultVo uploadFaceInCOSMode(List<MultipartFile> imgFileList, int personId) throws IOException {
         // 上传COS存储
         LinkedList<String> keyList = cosRequest.putObject(imgFileList);
         // upload face to device

@@ -181,10 +181,13 @@ public class SendDeviceRequest {
      */
     public void createDevicePersonFace(String devicePassword, String deviceIpAddress, Face face, Person person) {
         LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
+
         multiValueMap.set("pass", devicePassword);
         multiValueMap.set("personId", String.valueOf(person.getId()));
         multiValueMap.set("faceId", String.valueOf(face.getFaceId()));
         multiValueMap.set("url", face.getUrl());
+
+        // send request to device
         RequestResult requestResult = this.sendPostRequest(deviceIpAddress, createFaceUrl, multiValueMap);
         log.info("createPersonFaceRequest---{}", requestResult.getMsg());
     }
