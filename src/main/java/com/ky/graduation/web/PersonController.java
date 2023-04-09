@@ -41,6 +41,16 @@ public class PersonController {
     }
 
     /**
+     * list person and no split in page
+     *
+     * @return
+     */
+    @GetMapping("/listNoPage")
+    public ResultVo listNoPage() {
+        return ResultVo.success().data("items", personService.list());
+    }
+
+    /**
      * 人员注册或更新
      *
      * @param person

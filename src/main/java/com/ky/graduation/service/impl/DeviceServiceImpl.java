@@ -186,10 +186,8 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
     public ResultVo deleteDevice(int id) {
         // 删除设备中所有人员信息
         Device device = deviceMapper.selectById(id);
-        LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
-        multiValueMap.set("pass", device.getPassword());
-        multiValueMap.set("id", "-1");
-        sendDeviceRequest.sendPostRequest(device.getIpAddress(), deletePersonUrl, multiValueMap);
+        sendDeviceRequest.deleteDevicePerson(device.getPassword(), device.getIpAddress(), "-1");
+
         // 删除数据库中设备字段
         if (deviceMapper.deleteById(id) > 0) {
             return ResultVo.success();

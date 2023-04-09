@@ -15,7 +15,7 @@ tencent:
       regionName: ap-chengdu
       cosHost: https://ky2fe-1316858065.cos.ap-chengdu.myqcloud.com
 deviceOption:
-  isOpenDevice: true
+  isOpenDevice: false
 
 pictureUploadOption:
   # 改变图片存储方式，COS 方式为上传到腾讯 COS 存储，LOCAL 方式为本地字节流流方式存储到数据库

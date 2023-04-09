@@ -208,7 +208,7 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
      */
     private void raiseFaceReqToDB(List<Device> deviceList, Face face, Person person) {
         deviceList.forEach(device -> {
-            sendDeviceRequest.createDevicePersonFace(device.getPassword(), device.getPassword(), face, person);
+            sendDeviceRequest.createDevicePersonFace(device.getPassword(), device.getIpAddress(), face, person);
         });
     }
 
@@ -246,11 +246,8 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
     public ResultVo deleteFace(int faceId, int personId) {
         //TODO change delete logic
         Face face = faceMapper.selectById(faceId);
-        // 删除每个设备中这个人的此张相片
         LinkedList<Device> deviceList = personMapper.findDeviceListContainPerson(personId);
-        if (deviceList.size() > 0) {
-            raiseDeleteFaceReqToDB(deviceList, face);
-        }
+
         if (faceMapper.deleteById(faceId) < 1) {
             return ResultVo.error();
         }
@@ -258,8 +255,12 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
         if (checkPersonFaceStatus(personId)) {
             changePersonPhotosStatus(personId, (byte) 0);
         }
+
         // 根据key删除云端照片
         cosRequest.deleteObject(face.getName());
+
+        // 删除每个设备中这个人的此张相片
+        raiseDeleteFaceReqInDevice(deviceList, face);
         return ResultVo.success();
     }
 
@@ -281,7 +282,7 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
      * @param deviceList
      * @param face
      */
-    private void raiseDeleteFaceReqToDB(LinkedList<Device> deviceList, Face face) {
+    private void raiseDeleteFaceReqInDevice(LinkedList<Device> deviceList, Face face) {
         deviceList.forEach(device -> {
             sendDeviceRequest.deleteDevicePersonFace(device.getPassword(), device.getIpAddress(), face.getFaceId().toString());
         });
