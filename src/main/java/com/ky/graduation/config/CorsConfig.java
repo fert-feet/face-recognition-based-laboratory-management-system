@@ -25,7 +25,7 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         // 1 设置访问源地址
-        corsConfiguration.addAllowedOrigin("http://localhost:9527");
+        corsConfiguration.addAllowedOrigin("*");
         // 2 设置访问源请求头
         corsConfiguration.addAllowedHeader("*");
         // 3 设置访问源请求方法
