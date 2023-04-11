@@ -33,8 +33,8 @@ public class PersonController {
      */
     @PostMapping("/list")
     public ResultVo list(
-            long page,
-            long limit,
+            @RequestParam(defaultValue = "1") long page,
+            @RequestParam(defaultValue = "10") long limit,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String sort) {
         return personService.listPerson(page, limit, name, sort);
