@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -50,6 +51,15 @@ public class FaceController {
     @PostMapping("/upload")
     public ResultVo faceUpload(List<MultipartFile> imgList, int personId) throws IOException, SQLException {
         return faceService.faceUpload(imgList, personId);
+    }
+
+    @PostMapping("/uploadOne")
+    public ResultVo uploadOneFace(MultipartFile imgFile, int personId) throws SQLException, IOException {
+        List<MultipartFile> imgFileList = new ArrayList<>();
+        imgFileList.add(imgFile);
+
+
+        return faceService.faceUpload(imgFileList, personId);
     }
 
     /**

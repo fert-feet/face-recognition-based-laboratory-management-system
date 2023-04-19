@@ -72,8 +72,13 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
         if (person == null) {
             return ResultVo.error().status(ResultCode.VALIDATE_ERROR);
         }
+
+        // fetch for face photos of person
+        List<Face> facesOfPerson = personMapper.findFacesOfPerson(person.getId());
+
+
         // 成功并返回个人信息
-        return ResultVo.success().data("personInfo", person);
+        return ResultVo.success().data("personInfo", person).data("faceNum", facesOfPerson.size());
     }
 
     @Override

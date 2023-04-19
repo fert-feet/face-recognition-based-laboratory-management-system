@@ -45,3 +45,5 @@ requestUrl:
     deleteFace: /face/delete
     # 人员人脸清空
     clearFace: /face/deletePerson
+server:
+  port: 8089
