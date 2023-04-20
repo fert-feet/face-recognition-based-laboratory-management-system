@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.ky.graduation.device.RequestResult;
 import com.ky.graduation.entity.Device;
 import com.ky.graduation.entity.Face;
 import com.ky.graduation.entity.Laboratory;
@@ -20,7 +19,6 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -89,12 +87,15 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
             deviceMapper.insert(device);
             return ResultVo.success();
         }
+
         // when received lab equals origin lab, then this is an update device info request
         if (compareBindLaboratory(device)) {
             return updateDeviceInfo(device);
         }
+
         // if update device belong-lab status,then delete all data in device first
         sendDeviceRequest.deleteDevicePerson(device.getPassword(), device.getIpAddress(), "-1");
+
         // cancel distribute lab to device
         if (device.getLaboratoryId().equals(CANCEL_CHOOSE_LAB_CODE)) {
             return cancelDistributeLab(device);
@@ -114,7 +115,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
      */
     private boolean changeDeviceBelongsLab(Device device) {
         // if update belongs lab, then update labName in device at the same time
-        // update lab id according to lab name
+        // update lab name according to lab id
         String labName = laboratoryMapper.selectById(device.getLaboratoryId()).getName();
         device.setLaboratoryName(labName);
         if (deviceMapper.updateById(device) < 1) {
@@ -164,7 +165,6 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
      * @param device
      */
     private ResultVo cancelDistributeLab(Device device) {
-        //TODO need to change labName in device when update labName, since cancel foreign key
         device.setLaboratoryName("N");
         device.setLaboratoryId(0);
         if (deviceMapper.updateById(device) < 1) {
@@ -209,17 +209,12 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         // 若更改密码，则需请求设备进行更改
         Device selectDevice = deviceMapper.selectById(device.getId());
         if (!selectDevice.getPassword().equals(device.getPassword())) {
-            LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
-            // 旧密码
-            multiValueMap.set("oldPass", selectDevice.getPassword());
-            // 新密码
-            multiValueMap.set("newPass", device.getPassword());
-            RequestResult setPassWordRequest = sendDeviceRequest.sendPostRequest(device.getIpAddress(), setPassWordUrl, multiValueMap);
-            log.info("setPassWordRequest---{}", setPassWordRequest.getMsg());
+            sendDeviceRequest.updateDevicePassword(selectDevice.getIpAddress(), selectDevice.getPassword(), device.getPassword());
         }
         // 直接更新信息即可
         deviceMapper.updateById(device);
         return ResultVo.success();
     }
+
 
 }

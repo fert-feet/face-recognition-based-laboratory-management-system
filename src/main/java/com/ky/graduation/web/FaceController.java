@@ -67,7 +67,6 @@ public class FaceController {
         List<MultipartFile> imgFileList = new ArrayList<>();
         imgFileList.add(imgFile);
 
-
         return faceService.faceUpload(imgFileList, personId);
     }
 

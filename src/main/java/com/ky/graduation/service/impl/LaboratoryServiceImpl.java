@@ -95,6 +95,9 @@ public class LaboratoryServiceImpl extends ServiceImpl<LaboratoryMapper, Laborat
         List<PersonLaboratory> personLaboratoryList = fetchPersonLabList(personLaboratory);
         int deleteNum = deletePersonLabRelationship(personLaboratory);
 
+        // delete person in device belongs to lab
+        raiseDeletePersonReqInDevice(personLaboratory.getPId(), personLaboratory.getLabId());
+
         // check if deleted labs was the last lab that authorize to person
         // if not, then just return
         if (deleteNum > 0 && personLaboratoryList.size() > deleteNum) {
@@ -108,8 +111,6 @@ public class LaboratoryServiceImpl extends ServiceImpl<LaboratoryMapper, Laborat
             }
         }
 
-        // delete person in device belongs to lab
-        raiseDeletePersonReqInDevice(personLaboratory.getPId(), personLaboratory.getLabId());
         return ResultVo.error();
     }
 

@@ -15,11 +15,11 @@ tencent:
       regionName: ap-chengdu
       cosHost: https://ky2fe-1316858065.cos.ap-chengdu.myqcloud.com
 deviceOption:
-  isOpenDevice: false
+  isOpenDevice: true
 
 pictureUploadOption:
-  # 改变图片存储方式，COS 方式为上传到腾讯 COS 存储，LOCAL 方式为本地字节流流方式存储到数据库
-  faceImgStoreMode: COS
+  # 改变图片存储方式，COS 方式为上传到腾讯 COS 存储，LOCAL 方式为本地base64方式存储到数据库
+  faceImgStoreMode: LOCAL
 
 requestUrl:
   # 基础
@@ -45,5 +45,7 @@ requestUrl:
     deleteFace: /face/delete
     # 人员人脸清空
     clearFace: /face/deletePerson
+    # 人脸更新
+    updateFace: /face
 server:
   port: 8089

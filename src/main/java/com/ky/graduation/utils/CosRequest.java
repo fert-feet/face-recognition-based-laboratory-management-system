@@ -146,9 +146,8 @@ public class CosRequest {
      * 删除图片请求
      *
      * @param key
-     * @return
      */
-    public boolean deleteObject(String key) {
+    public void deleteObject(String key) {
         COSClient cosClient = initCosClient();
         // 因为图像处理后会分为两个文件，一个一个源文件，一个处理后的文件，因此需要将两个都删除
         // 原文件
@@ -156,7 +155,6 @@ public class CosRequest {
         // 处理后的文件
         cosClient.deleteObject(cosConfig.getBucketName(), getOriginUrl(key));
         cosClient.shutdown();
-        return true;
     }
 
 }

@@ -1,49 +1,27 @@
-package com.ky.graduation.utils;
+package com.ky.graduation;
 
-import org.springframework.web.multipart.MultipartFile;
+import com.ky.graduation.utils.FaceImgLocalStoreUtil;
+import com.qcloud.cos.utils.IOUtils;
+import jakarta.annotation.Resource;
+import org.apache.commons.codec.binary.Base64;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.LinkedList;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
- * @author: Ky2Fe
- * @program: graduation
- * @description: 文件类工具
+ * @author : kyrie
+ * @description: : 测试
  **/
 
-public class FileUtils {
+public class Test {
 
-    /**
-     * 接口只能接受MultipartFile, 腾讯云需要File
-     * 故 MultipartFile => File
-     *
-     * @param multipartFileList 上传文件
-     * @return file
-     */
-    public static LinkedList<File> multipartFileToFile(List<MultipartFile> multipartFileList) throws IOException {
-        // 存储转换后的文件
-        LinkedList<File> imgFileLinkedList = new LinkedList<>();
-        // 获取文件名
-        for (MultipartFile multipartFile : multipartFileList) {
-            String fileName = multipartFile.getOriginalFilename();
-            // 获取文件后缀
-            assert fileName != null;
-            String suffix = fileName.substring(fileName.lastIndexOf("."));
-            // 防止生成的临时文件重复,文件名随机码, UUID
-            File file = File.createTempFile(UUID.randomUUID().toString().replaceAll("-", ""), suffix);
-            multipartFile.transferTo(file);
-            imgFileLinkedList.add(file);
-        }
-        return imgFileLinkedList;
-    }
+    @Resource
+    private FaceImgLocalStoreUtil localStoreUtil;
 
     /**
      * 压缩图片大小和分辨率
@@ -90,5 +68,29 @@ public class FileUtils {
         out.close();
 
         return outputFile;
+    }
+
+
+    public void test() throws IOException {
+        File file = new File("D:\\C盘迁移\\桌面\\temp\\face.jpg");
+
+        // compress file
+        File compressedFile = compress(file);
+
+        FileInputStream fileInputStream = new FileInputStream(compressedFile);
+        //使用IO流将其转换为字节数组
+        byte[] encodeBytes = IOUtils.toByteArray(fileInputStream);
+        //将字节转换为base64
+        String encodeBase64 = Base64.encodeBase64String(encodeBytes);
+
+        fileInputStream.close();
+    }
+
+    public static void main(String[] args) {
+        List<String> list = new ArrayList<>();
+        list.add("LAN_EXP-8012");
+        list.add("LAN_EXP-3009");
+        Stream<String> stringStream = list.stream().filter(item -> item.contains("8"));
+        stringStream.forEach(System.out::println);
     }
 }

@@ -1,6 +1,7 @@
 package com.ky.graduation.exception;
 
 import cn.hutool.http.HttpException;
+import com.ky.graduation.exception.myExp.FaceException;
 import com.ky.graduation.result.ResultCode;
 import com.ky.graduation.result.ResultVo;
 import com.qcloud.cos.exception.CosClientException;
@@ -182,5 +183,18 @@ public class GlobalExceptionHandler {
         return ResultVo.error().status(ResultCode.DEVICE_REQUEST_ERROR);
     }
 
+    /**
+     * 处理人脸异常
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = FaceException.class)
+    @ResponseBody
+    public ResultVo faceExceptionHandler(FaceException e) {
+        //获取错误信息
+        log.error("人脸异常---{}", e.getMessage());
+        return ResultVo.error().status(ResultCode.FACE_ERROR);
+    }
 
 }

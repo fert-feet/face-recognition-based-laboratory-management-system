@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -59,7 +60,8 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
     private SendDeviceRequest sendDeviceRequest;
     public static final String LOCAL = "LOCAL";
     @Resource
-    private FaceImgLocalStoreUtil storeUtil;
+    private FaceImgLocalStoreUtil localStoreUtil;
+
     @Value("${pictureUploadOption.faceImgStoreMode}")
     private String storeMode;
 
@@ -108,47 +110,76 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
      * @return
      */
     private ResultVo uploadFaceInLocalMode(List<MultipartFile> imgFileList, int personId) throws IOException, SQLException {
-        // TODO need to complete local mode
-        return ResultVo.success();
-    }
+        //convert to base64 and bytes
+        FaceImgLocalStoreDTO faceImgLocalStoreDTO = localStoreUtil.faceImgLocalStoreProcess(imgFileList);
 
-    /**
-     * store face image in db and device
-     *
-     * @param faceLocalStoreDTO
-     * @param personId
-     */
-    private void storeFaceImg(FaceImgLocalStoreDTO faceLocalStoreDTO, int personId) throws SQLException {
+        // create new face record in db
+        List<Face> faceList = storeFaceImgInDB(personId, faceImgLocalStoreDTO.getImgBase64EncodeList());
+
+        // upload face to device
+        storeFaceImgInDevice(personId, faceList);
+
+        // change person set photos status
+        if (!changePersonPhotosStatus(personId, (byte) 1)) {
+            return ResultVo.error();
+        }
+        return ResultVo.success();
     }
 
     /**
      * store face photos base64 encode into device
      *
      * @param personId
-     * @param imgBase64EncodeList
+     * @param faceList
      */
-    private void storeFaceImgInDevice(int personId, List<String> imgBase64EncodeList) {
-        for (String imgEncode : imgBase64EncodeList) {
+    private void storeFaceImgInDevice(int personId, List<Face> faceList) {
+        LinkedList<Device> deviceList = personMapper.findDeviceListContainPerson(personId);
+
+        for (Device device : deviceList) {
+            raiseCreateFaceReqInDevice(device, faceList, buildPersonForDeviceReq(personId));
         }
     }
 
     /**
-     * store img bytes in local db with longBlob type
+     * raise create face req in device
+     *
+     * @param device
+     * @param faceList
+     * @param person
+     */
+    private void raiseCreateFaceReqInDevice(Device device, List<Face> faceList, Person person) {
+        faceList.forEach(face -> {
+            sendDeviceRequest.createDevicePersonFace(device.getPassword(), device.getIpAddress(), face, person);
+        });
+    }
+
+    /**
+     * store img base64 in local db with longBlob type
      *
      * @param personId
      * @param imgByteEncodeList
      */
-    private boolean storeFaceImgInDB(int personId, List<byte[]> imgByteEncodeList) throws SQLException {
-        for (byte[] imgBytes : imgByteEncodeList) {
+    private List<Face> storeFaceImgInDB(int personId, List<String> imgByteEncodeList) throws SQLException {
+        List<Face> faceIdList = new ArrayList<>();
+        List<Face> facesOfPerson = personMapper.findFacesOfPerson(personId);
+
+        // count if face number large than 3, then don't store in db
+        if (facesOfPerson.size() == 3) {
+            return faceIdList;
+        }
+
+        for (String imgEncode : imgByteEncodeList) {
             Face face = new Face();
             face.setPersonId(personId);
+            face.setImgEncode(imgEncode);
 
             // insert into db
-            if (faceMapper.insert(face) != 1) {
+            if (faceMapper.insert(face) < 1) {
                 throw new SQLException("face insert error!");
             }
+            faceIdList.add(face);
         }
-        return true;
+        return faceIdList;
     }
 
     /**
@@ -256,13 +287,16 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
         if (faceMapper.deleteById(faceId) < 1) {
             return ResultVo.error();
         }
+
         // 若该人员已经没有人脸，则改变人脸设置状态
         if (checkPersonFaceStatus(personId)) {
             changePersonPhotosStatus(personId, (byte) 0);
         }
 
-        // 根据key删除云端照片
-        cosRequest.deleteObject(face.getName());
+        if (COS.equals(storeMode)) {
+            // 根据key删除云端照片
+            cosRequest.deleteObject(face.getName());
+        }
 
         // 删除每个设备中这个人的此张相片
         raiseDeleteFaceReqInDevice(deviceList, face);

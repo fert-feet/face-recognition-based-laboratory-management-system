@@ -44,6 +44,7 @@ public enum ResultCode implements StatusCode {
 
     DEVICE_REQUEST_ERROR(2000, "人脸机请求失败"),
 
+    FACE_ERROR(80001, "未检测到人脸")
     ;
 
     /**

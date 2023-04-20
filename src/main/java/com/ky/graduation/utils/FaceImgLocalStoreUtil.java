@@ -45,7 +45,11 @@ public class FaceImgLocalStoreUtil {
         List<String> faceBase64List = new ArrayList<>();
 
         for (File imgFile : faceImgFileList) {
-            FileInputStream fileInputStream = new FileInputStream(imgFile);
+
+            // compress file
+            File compressedFile = FileUtils.compress(imgFile);
+
+            FileInputStream fileInputStream = new FileInputStream(compressedFile);
             //使用IO流将其转换为字节数组
             byte[] encodeBytes = IOUtils.toByteArray(fileInputStream);
             //将字节转换为base64
@@ -60,24 +64,5 @@ public class FaceImgLocalStoreUtil {
         storeDTO.setImgByteEncodeList(faceBytesList);
         storeDTO.setImgBase64EncodeList(faceBase64List);
         return storeDTO;
-    }
-
-    public static void main(String[] args) throws IOException {
-        FaceImgLocalStoreUtil faceImgLocalStoreUtil = new FaceImgLocalStoreUtil();
-        faceImgLocalStoreUtil.test();
-    }
-
-    public void test() throws IOException {
-        File file = new File("D:\\C盘迁移\\桌面\\temp\\face.jpg");
-
-        FileInputStream fileInputStream = new FileInputStream(file);
-        //使用IO流将其转换为字节数组
-        byte[] encodeBytes = IOUtils.toByteArray(fileInputStream);
-        //将字节转换为base64
-        String encodeBase64 = Base64.encodeBase64String(encodeBytes);
-        fileInputStream.close();
-
-        System.out.println(encodeBase64);
-
     }
 }

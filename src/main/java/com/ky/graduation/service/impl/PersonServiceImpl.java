@@ -34,6 +34,11 @@ import java.util.List;
 public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> implements IPersonService {
 
     private static final String SORT_REVERSE = "-id";
+
+    public static final String COS = "COS";
+
+    @Value("${pictureUploadOption.faceImgStoreMode}")
+    private String storeMode;
     private static final String AUTHENTICATED_SQL = "SELECT lab_id FROM person_laboratory WHERE p_id=";
     @Resource
     private SendDeviceRequest sendDeviceRequest;
@@ -49,14 +54,6 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
     private CosRequest cosRequest;
     @Resource
     private PersonLaboratoryMapper personLaboratoryMapper;
-    @Value("${requestUrl.person.createPerson}")
-    private String createPersonUrl;
-    @Value("${requestUrl.person.deletePerson}")
-    private String deletePersonUrl;
-    @Value("${requestUrl.face.createFace}")
-    private String createFaceUrl;
-    @Value("${requestUrl.person.updatePerson}")
-    private String updatePersonUrl;
 
     @Override
     public ResultVo listPerson(long page, long limit, String name, String sort) {
@@ -331,10 +328,11 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
         faceWrapper.eq(Face::getPersonId, personId);
         List<Face> faceList = faceMapper.selectList(faceWrapper);
 
-        // 若有人脸信息，循环向云端发起删除请求
-        faceList.forEach(face -> {
-            cosRequest.deleteObject(face.getName());
-        });
+        if (COS.equals(storeMode)) {
+            faceList.forEach(face -> {
+                cosRequest.deleteObject(face.getName());
+            });
+        }
     }
 
     /**

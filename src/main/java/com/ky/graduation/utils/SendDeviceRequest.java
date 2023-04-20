@@ -6,6 +6,7 @@ import cn.hutool.json.JSONUtil;
 import com.ky.graduation.device.RequestResult;
 import com.ky.graduation.entity.Face;
 import com.ky.graduation.entity.Person;
+import com.ky.graduation.exception.myExp.FaceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -46,6 +47,9 @@ public class SendDeviceRequest {
     @Value("${requestUrl.person.updatePerson}")
     private String updatePersonUrl;
 
+    @Value("${requestUrl.device.setPassWord}")
+    private String setPassWordUrl;
+
 
     /**
      * 发送get请求（有参数）
@@ -54,7 +58,7 @@ public class SendDeviceRequest {
      * @param params
      * @return JSONObject
      */
-    public RequestResult sendGetRequest(String ip, String url, MultiValueMap<String, Object> params) {
+    private RequestResult sendGetRequest(String ip, String url, MultiValueMap<String, Object> params) {
         RestTemplate client = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         HttpMethod method = HttpMethod.POST;
@@ -80,7 +84,7 @@ public class SendDeviceRequest {
      * @param url
      * @return JSONObject
      */
-    public RequestResult sendGetRequest(String ip, String url) {
+    private RequestResult sendGetRequest(String ip, String url) {
         RestTemplate client = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         HttpMethod method = HttpMethod.GET;
@@ -106,7 +110,7 @@ public class SendDeviceRequest {
      * @param params
      * @return JSONObject
      */
-    public RequestResult sendPostRequest(String ip, String url, MultiValueMap<String, Object> params) {
+    private RequestResult sendPostRequest(String ip, String url, MultiValueMap<String, Object> params) {
         // skip device request when isOpenDevice is false
         if (!isOpenDevice) {
             return new RequestResult();
@@ -123,6 +127,9 @@ public class SendDeviceRequest {
         //执行HTTP请求，将返回的结构使用ResultVO类格式化
         ResponseEntity<JSONObject> response = client.exchange(requestUrl, method, requestEntity, JSONObject.class);
         RequestResult requestResult = JSONUtil.toBean(response.getBody(), RequestResult.class);
+        if (requestResult != null && requestResult.getCode().contains("8")) {
+            throw new FaceException(requestResult.getMsg());
+        }
         if (requestResult != null && !requestResult.getCode().equals(SUCCESS_CODE)) {
             throw new HttpException(requestResult.getMsg());
         }
@@ -185,6 +192,8 @@ public class SendDeviceRequest {
         multiValueMap.set("pass", devicePassword);
         multiValueMap.set("personId", String.valueOf(person.getId()));
         multiValueMap.set("faceId", String.valueOf(face.getFaceId()));
+        multiValueMap.set("base64", face.getImgEncode());
+        multiValueMap.set("isEasyWay", true);
         multiValueMap.set("url", face.getUrl());
 
         // send request to device
@@ -205,6 +214,19 @@ public class SendDeviceRequest {
         multiValueMap.set("faceId", faceId);
         RequestResult requestResult = this.sendPostRequest(deviceIpAddress, deleteFaceUrl, multiValueMap);
         log.info("deletePersonFaceRequest---{}", requestResult.getMsg());
+    }
+
+    /**
+     * @return
+     */
+    public void updateDevicePassword(String deviceIpAddress, String oldPassWord, String newPassWord) {
+        LinkedMultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
+        // 旧密码
+        multiValueMap.set("oldPass", oldPassWord);
+        // 新密码
+        multiValueMap.set("newPass", newPassWord);
+        RequestResult setPassWordRequest = this.sendPostRequest(deviceIpAddress, setPassWordUrl, multiValueMap);
+        log.info("setPassWordRequest---{}", setPassWordRequest.getMsg());
     }
 
 
