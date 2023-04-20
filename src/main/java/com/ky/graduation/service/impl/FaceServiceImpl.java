@@ -1,5 +1,6 @@
 package com.ky.graduation.service.impl;
 
+import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -171,6 +172,7 @@ public class FaceServiceImpl extends ServiceImpl<FaceMapper, Face> implements IF
         for (String imgEncode : imgByteEncodeList) {
             Face face = new Face();
             face.setPersonId(personId);
+            face.setName(IdUtil.simpleUUID());
             face.setImgEncode(imgEncode);
 
             // insert into db
