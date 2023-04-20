@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>
@@ -255,5 +256,72 @@ public class LaboratoryServiceImpl extends ServiceImpl<LaboratoryMapper, Laborat
         wrapper.eq(Device::getLaboratoryName, labName);
         List<Device> deviceList = deviceMapper.selectList(wrapper);
         return ResultVo.success().data("deviceList", deviceList);
+    }
+
+    @Override
+    public ResultVo createOrUpdate(Laboratory laboratory) {
+
+        // create new record when id equals null
+        if (Objects.isNull(laboratory.getId())) {
+            return insertLab(laboratory);
+        }
+
+        // update lab name in device
+        if (!updateLabNameInDevice(laboratory)) {
+            return ResultVo.error();
+        }
+
+        if (laboratoryMapper.updateById(laboratory) < 1) {
+            return ResultVo.error();
+        }
+        return ResultVo.success();
+    }
+
+    /**
+     * // update lab name in device
+     *
+     * @param laboratory
+     * @return
+     */
+    private boolean updateLabNameInDevice(Laboratory laboratory) {
+        List<Device> deviceList = findAllDeviceOfLab(laboratory);
+
+        // update device's lab name
+        for (Device device : deviceList) {
+            device.setLaboratoryName(laboratory.getName());
+            if (deviceMapper.updateById(device) < 1) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * find all device that bind with this lab
+     *
+     * @param laboratory
+     * @return
+     */
+    private List<Device> findAllDeviceOfLab(Laboratory laboratory) {
+        LambdaQueryWrapper<Device> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(Device::getLaboratoryId, laboratory.getId());
+
+        // fetch all device of this lab
+        List<Device> deviceList = deviceMapper.selectList(wrapper);
+        return deviceList;
+    }
+
+    /**
+     * create new lab record
+     *
+     * @param laboratory
+     * @return
+     */
+    private ResultVo insertLab(Laboratory laboratory) {
+        if (laboratoryMapper.insert(laboratory) < 1) {
+            return ResultVo.error();
+        }
+        return ResultVo.success();
     }
 }

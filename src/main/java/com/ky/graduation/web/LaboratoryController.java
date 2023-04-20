@@ -62,10 +62,7 @@ public class LaboratoryController {
      */
     @PostMapping("/createOrUpdate")
     public ResultVo create(@RequestBody Laboratory laboratory) {
-        if (laboratoryService.saveOrUpdate(laboratory)) {
-            return ResultVo.success();
-        }
-        return ResultVo.error();
+        return laboratoryService.createOrUpdate(laboratory);
     }
 
     /**

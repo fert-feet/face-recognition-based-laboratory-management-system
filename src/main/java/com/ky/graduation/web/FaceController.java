@@ -53,6 +53,15 @@ public class FaceController {
         return faceService.faceUpload(imgList, personId);
     }
 
+    /**
+     * upload one image
+     *
+     * @param imgFile
+     * @param personId
+     * @return
+     * @throws SQLException
+     * @throws IOException
+     */
     @PostMapping("/uploadOne")
     public ResultVo uploadOneFace(MultipartFile imgFile, int personId) throws SQLException, IOException {
         List<MultipartFile> imgFileList = new ArrayList<>();

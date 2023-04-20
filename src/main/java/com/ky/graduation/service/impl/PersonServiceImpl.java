@@ -239,20 +239,47 @@ public class PersonServiceImpl extends ServiceImpl<PersonMapper, Person> impleme
     public ResultVo createOrUpdate(Person person) {
         // id为空则为新增，直接操作数据库
         if (person.getId() == null) {
-            personMapper.insert(person);
-            return ResultVo.success();
+            return insertPerson(person);
         }
-        // 若已经写入人脸机中，则需要请求人脸机进行修改
+
+        // if this have record of person in device, then update record in device meanwhile
         if (person.getIsDistributed() == 1) {
-            // 查找人员所在的各设备
             updatePeronInDevice(person);
         }
-        // 设置默认密码
-        person.setPassword(person.getIdNumber());
-        if (personMapper.updateById(person) < 1) {
+
+        // update person information
+        if (!updatePerson(person)) {
+            return ResultVo.error();
+        }
+
+        return ResultVo.success();
+    }
+
+    /**
+     * create person logic
+     *
+     * @param person
+     */
+    private ResultVo insertPerson(Person person) {
+        if (StringUtils.isBlank(person.getPassword())) {
+            person.setPassword(person.getIdNumber());
+        }
+        if (personMapper.insert(person) < 1) {
             return ResultVo.error();
         }
         return ResultVo.success();
+    }
+
+    /**
+     * update person logic
+     *
+     * @param person
+     */
+    private boolean updatePerson(Person person) {
+        if (StringUtils.isBlank(person.getPassword())) {
+            person.setPassword(person.getIdNumber());
+        }
+        return personMapper.updateById(person) >= 1;
     }
 
     /**
